@@ -80,5 +80,30 @@ services:
           memory: 1.2G
     restart: always
 
+  service-registry:
+    build: service-registry
+    container_name: service-registry-container
+    hostname: service-registry
+    environment:
+      SERVER_PORT: 8761
+    ports:
+      - "${DISCOVERY_SERVER_HOST_PORT}:8761"
+    networks:
+      - backend_network
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.1'
+          memory: 400M
+        limits:
+          cpus: '1'
+          memory: 512M
+    healthcheck:
+      test: curl --fail --silent localhost:8761/actuator/health | grep UP || exit 1
+      interval: 20s
+      start_period: 30s
+      timeout: 5s
+      retries: 5
+
 networks:
   backend_network:
