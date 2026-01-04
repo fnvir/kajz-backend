@@ -9,7 +9,7 @@ services:
     ports:
       - ${KEYCLOAK_DB_HOST_PORT}:5432
     volumes:
-      - ../resources/kajz/db/keycloakdb:/var/lib/postgresql/data
+      - ../../resources/kajz/db/keycloakdb:/var/lib/postgresql/data
     networks:
       - backend_network
     healthcheck:
