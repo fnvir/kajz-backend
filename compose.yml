@@ -1,0 +1,84 @@
+services:
+  keycloak-db:
+    image: postgres:18.1-alpine
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
+      POSTGRES_USER: ${COMMON_DB_USER}
+      POSTGRES_PASSWORD: ${COMMON_DB_PASSWORD}
+    ports:
+      - ${KEYCLOAK_DB_HOST_PORT}:5432
+    volumes:
+      - ../resources/kajz/db/keycloakdb:/var/lib/postgresql/data
+    networks:
+      - backend_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${COMMON_DB_USER} -d ${KEYCLOAK_DB_NAME}"]
+      interval: 20s
+      start_period: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    restart: always
+
+  keycloak:
+    build: ./keycloak
+    container_name: keycloak
+    command: start --optimized
+    environment:
+      # bootstrap admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_SPI_ADMIN_REALM: master
+
+      # db config
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME}
+      KC_DB_USERNAME: ${COMMON_DB_USER}
+      KC_DB_PASSWORD: ${COMMON_DB_PASSWORD}
+
+      # config
+      KC_CACHE: local
+
+      KC_HTTP_ENABLED: true
+      KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_PORT: 8080
+      KC_HOSTNAME: ${KEYCLOAK_HOST_NAME}
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+
+      KC_PROXY_HEADERS: xforwarded
+      # KC_PROXY_TRUSTED_ADDRESSES: ...
+      
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    ports:
+      - ${KEYCLOAK_HOST_PORT}:8080
+    depends_on:
+      - keycloak-db
+    networks:
+      - backend_network
+    healthcheck:
+      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck {public static void main(String[] args) throws Exception {System.exit(200 ==((java.net.HttpURLConnection)new java.net.URI(args[0]).toURL().openConnection()).getResponseCode()?0:1);}}" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/live']
+      interval: 20s
+      start_period: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+        limits:
+          cpus: "1"
+          memory: 1.2G
+    restart: always
+
+networks:
+  backend_network:
