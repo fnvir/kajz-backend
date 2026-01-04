@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: serviceregistry
+  
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  endpoint:
+    health:
+      access: read-only
+      probes:
+        enabled: true
+    metrics:
+      access: read-only
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
