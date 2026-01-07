@@ -3,6 +3,7 @@ package dev.fnvir.kajz.authservice.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import dev.fnvir.kajz.authservice.dto.UserDTO;
 import dev.fnvir.kajz.authservice.dto.req.UserSignupRequest;
+import dev.fnvir.kajz.authservice.dto.res.UserResponse;
 import dev.fnvir.kajz.authservice.exception.ApiException;
 import dev.fnvir.kajz.authservice.util.ResponseUtils;
 import jakarta.validation.Valid;
@@ -116,6 +118,23 @@ public class KeycloakService {
             refreshRoleCache();
         }
         return roleCache.get(role);
+    }
+
+    public UserResponse findUser(UUID userId) {
+        try {
+            var userResource = keycloak.realm(userRealm).users().get(userId.toString());
+            var user = userResource.toRepresentation();
+            return UserResponse.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .emailVerified(user.isEmailVerified() != null && user.isEmailVerified())
+                    .build();
+        } catch (jakarta.ws.rs.ClientErrorException e) {
+            throw new ApiException(e.getResponse().getStatus(), e.getMessage());
+        }
     }
 
 }
