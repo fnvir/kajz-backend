@@ -3,6 +3,13 @@ spring:
     name: AuthService
   threads:
     virtual.enabled: true
+    
+  mvc:
+    apiversion:
+      default: 1
+      supported: 1
+      use:
+        header: X-API-Version
 
 keycloak:
   server-url: http://host.docker.internal:8444
