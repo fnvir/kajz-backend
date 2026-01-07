@@ -37,12 +37,18 @@ public record UserSignupRequest(
         LocalDate dateOfBirth
 ) {
     
+    public UserSignupRequest {
+        firstName = StringUtils.trim(firstName);
+        lastName  = StringUtils.trim(lastName);
+        email     = StringUtils.trim(email);
+    }
+    
     public String username() {
-        return String.join("_", 
-                StringUtils.substring(firstName, 0, 10),
-                StringUtils.substring(lastName, 0, 10),
+        return String.join(".", 
+                StringUtils.substring(firstName, 0, 10).trim(),
+                StringUtils.substring(lastName, 0, 10).trim(),
                 UUID.randomUUID().toString().substring(0, 8)
-        );
+        ).toLowerCase();
     }
     
 }
