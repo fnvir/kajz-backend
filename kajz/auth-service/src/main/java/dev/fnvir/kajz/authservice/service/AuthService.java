@@ -8,9 +8,12 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import dev.fnvir.kajz.authservice.dto.UserDTO;
+import dev.fnvir.kajz.authservice.dto.req.ForgotPasswordReq;
 import dev.fnvir.kajz.authservice.dto.req.OtpVerifcationReq;
 import dev.fnvir.kajz.authservice.dto.req.ResendEmailVerificationReq;
+import dev.fnvir.kajz.authservice.dto.req.ResetPasswordRequest;
 import dev.fnvir.kajz.authservice.dto.req.UserSignupRequest;
+import dev.fnvir.kajz.authservice.exception.ApiException;
 import dev.fnvir.kajz.authservice.exception.ConflictException;
 import dev.fnvir.kajz.authservice.service.OtpService.OtpType;
 import jakarta.validation.Valid;
@@ -62,6 +65,26 @@ public class AuthService {
         String emailContent = templateEngine.process("account-verification-email", context);
         
         emailService.sendEmailAsync(userEmail, "Verify your account", emailContent, true);
+    }
+
+    public void initiatePasswordReset(@Valid ForgotPasswordReq req) {
+        // validate email (will send 404 if no user found)
+        keycloakService.findByEmail(req.email());
+        // generate otp
+        String otp = otpService.generateAndSaveOtp(OtpType.PASSWORD_RECOVERY, req.email());
+        // generate email content
+        Context context = new Context();
+        context.setVariable("otp", otp);
+        String emailContent = templateEngine.process("password-reset-email", context);
+        // send email
+        emailService.sendEmailAsync(req.email(), "Verify your account", emailContent, true);
+    }
+    
+    public void resetPassword(@Valid ResetPasswordRequest req) {
+        if (!otpService.verifyOtp(OtpType.PASSWORD_RECOVERY, req.email(), req.otp())) {
+            throw new ApiException(403, "Code is invalid or expired");
+        }
+        keycloakService.resetUserPasswordByEmail(req.email(), req.password());
     }
 
 }

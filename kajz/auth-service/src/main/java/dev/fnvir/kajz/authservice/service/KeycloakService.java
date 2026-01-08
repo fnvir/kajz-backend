@@ -171,5 +171,21 @@ public class KeycloakService {
                 .stream().findFirst()
                 .orElseThrow(NotFoundException::new);
     }
+    
+    public void resetUserPasswordByEmail(String email, String newPassword) {
+        String userId = getUserRepresentationByEmail(email).getId();
+        resetUserPassword(userId, newPassword);
+    }
+    
+    public void resetUserPassword(String userId, String newPassword) {
+        var userResource = keycloak.realm(userRealm).users().get(userId);
+
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(newPassword);
+
+        userResource.resetPassword(passwordCred);
+    }
 
 }
