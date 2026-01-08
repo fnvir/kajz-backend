@@ -10,10 +10,10 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "email")
 public class EmailProperties {
 
-    private final String clientId;
-    private final String clientSecret;
-    private final String tenantId;
-    private final String scope;
-    private final String username;
+    private String clientId;
+    private String clientSecret;
+    private String tenantId;
+    private String scope;
+    private String username;
     
 }
