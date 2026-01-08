@@ -4,6 +4,12 @@ spring:
   threads:
     virtual.enabled: true
     
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis1234
+    
   mvc:
     apiversion:
       default: 1

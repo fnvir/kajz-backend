@@ -101,6 +101,18 @@ public class KeycloakService {
                 .build();
     }
     
+    public void verifyUserEmail(String email) {
+        try {
+            UserRepresentation user = getUserRepresentationByEmail(email);
+            if (user.isEmailVerified() == null || !user.isEmailVerified()) {
+                user.setEmailVerified(true);
+                keycloak.realm(userRealm).users().get(user.getId()).update(user);
+            }
+        } catch (jakarta.ws.rs.ClientErrorException e) {
+            throw new ApiException(e.getResponse().getStatus(), e.getMessage());
+        }
+    }
+    
     @Scheduled(initialDelay = 30, fixedRate = 2 * 60 * 60, timeUnit = TimeUnit.SECONDS)
     void refreshRoleCache() {
         var realm = keycloak.realm(userRealm);
