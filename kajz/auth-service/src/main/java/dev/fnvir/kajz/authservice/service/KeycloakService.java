@@ -34,8 +34,8 @@ public class KeycloakService {
     
     private final Keycloak keycloak;
     
-    private static final String BUYER_ROLE = "buyer";
-    private static final String SELLER_ROLE = "seller";
+    public static final String BUYER_ROLE = "buyer";
+    public static final String SELLER_ROLE = "seller";
     
     private final Map<String, RoleRepresentation> roleCache = new ConcurrentHashMap<>(2);
     
