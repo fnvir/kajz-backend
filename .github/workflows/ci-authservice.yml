@@ -23,6 +23,9 @@ on:
 jobs:
   auth-service-tests:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kajz
     steps:
     - uses: actions/checkout@v6
     - name: Set up JDK 25
