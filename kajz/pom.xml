@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>dev.fnvir</groupId>
+  <artifactId>kajz</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Kajz</name>
+  <description>Kajz Project</description>
+  <url>https://github.com/fnvir/kajz-backend</url>
+
+  <properties>
+    <java.version>25</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <modules>
+    <module>service-registry</module>
+    <module>auth-service</module>
+  </modules>
+
+  <developers>
+    <developer>
+      <name>Farhan Tanvir</name>
+      <email>farhantaanvir@gmail.com</email>
+    </developer>
+  </developers>
+
+</project>
