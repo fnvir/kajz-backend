@@ -19,6 +19,14 @@ on:
     paths:
       - 'kajz/auth-service/src/**'
       - 'kajz/auth-service/pom.xml'
+  workflow_dispatch:
+      inputs:
+        log-level:
+          description: 'Log level'
+          required: true
+          default: 'info'
+          type: choice
+          options: [info, debug, trace]
 
 jobs:
   auth-service-tests:
