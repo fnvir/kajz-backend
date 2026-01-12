@@ -21,6 +21,7 @@ import dev.fnvir.kajz.authservice.dto.UserDTO;
 import dev.fnvir.kajz.authservice.dto.req.UserSignupRequest;
 import dev.fnvir.kajz.authservice.dto.res.UserResponse;
 import dev.fnvir.kajz.authservice.exception.ApiException;
+import dev.fnvir.kajz.authservice.exception.NotFoundException;
 import dev.fnvir.kajz.authservice.util.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,8 @@ public class KeycloakService {
     
     private final Keycloak keycloak;
     
-    private static final String BUYER_ROLE = "buyer";
-    private static final String SELLER_ROLE = "seller";
+    public static final String BUYER_ROLE = "buyer";
+    public static final String SELLER_ROLE = "seller";
     
     private final Map<String, RoleRepresentation> roleCache = new ConcurrentHashMap<>(2);
     
@@ -100,6 +101,18 @@ public class KeycloakService {
                 .build();
     }
     
+    public void verifyUserEmail(String email) {
+        try {
+            UserRepresentation user = getUserRepresentationByEmail(email);
+            if (user.isEmailVerified() == null || !user.isEmailVerified()) {
+                user.setEmailVerified(true);
+                keycloak.realm(userRealm).users().get(user.getId()).update(user);
+            }
+        } catch (jakarta.ws.rs.ClientErrorException e) {
+            throw new ApiException(e.getResponse().getStatus(), e.getMessage());
+        }
+    }
+    
     @Scheduled(initialDelay = 30, fixedRate = 2 * 60 * 60, timeUnit = TimeUnit.SECONDS)
     void refreshRoleCache() {
         var realm = keycloak.realm(userRealm);
@@ -121,20 +134,58 @@ public class KeycloakService {
     }
 
     public UserResponse findUser(UUID userId) {
+        var user = getUserRepresentationById(userId);
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .emailVerified(user.isEmailVerified() != null && user.isEmailVerified())
+                .build();
+    }
+    
+    public UserResponse findByEmail(String email) {
+        var user = getUserRepresentationByEmail(email);
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .emailVerified(user.isEmailVerified() != null && user.isEmailVerified())
+                .build();
+    }
+    
+    private UserRepresentation getUserRepresentationById(UUID userId) {
         try {
             var userResource = keycloak.realm(userRealm).users().get(userId.toString());
-            var user = userResource.toRepresentation();
-            return UserResponse.builder()
-                    .id(user.getId())
-                    .email(user.getEmail())
-                    .username(user.getUsername())
-                    .firstName(user.getFirstName())
-                    .lastName(user.getLastName())
-                    .emailVerified(user.isEmailVerified() != null && user.isEmailVerified())
-                    .build();
+            return userResource.toRepresentation();
         } catch (jakarta.ws.rs.ClientErrorException e) {
             throw new ApiException(e.getResponse().getStatus(), e.getMessage());
         }
+    }
+    
+    private UserRepresentation getUserRepresentationByEmail(String email) {
+        return keycloak.realm(userRealm).users().searchByEmail(email, true)
+                .stream().findFirst()
+                .orElseThrow(NotFoundException::new);
+    }
+    
+    public void resetUserPasswordByEmail(String email, String newPassword) {
+        String userId = getUserRepresentationByEmail(email).getId();
+        resetUserPassword(userId, newPassword);
+    }
+    
+    public void resetUserPassword(String userId, String newPassword) {
+        var userResource = keycloak.realm(userRealm).users().get(userId);
+
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        passwordCred.setValue(newPassword);
+
+        userResource.resetPassword(passwordCred);
     }
 
 }

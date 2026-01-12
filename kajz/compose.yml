@@ -80,6 +80,27 @@ services:
           memory: 1.2G
     restart: always
 
+  redis:
+    container_name: redis
+    image: redis:8.4-alpine
+    command: "redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}"
+    ports:
+      - 6379:6379
+    networks:
+      - backend_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.6'
+          memory: 1.2G
+        reservations:
+          cpus: '0.4'
+          memory: 512M
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+    restart: always
+
   service-registry:
     build: service-registry
     container_name: service-registry-container
@@ -104,6 +125,9 @@ services:
       start_period: 30s
       timeout: 5s
       retries: 5
+
+volumes:
+  redis_data:
 
 networks:
   backend_network:

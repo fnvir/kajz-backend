@@ -4,6 +4,12 @@ spring:
   threads:
     virtual.enabled: true
     
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis1234
+    
   mvc:
     apiversion:
       default: 1
@@ -19,7 +25,14 @@ keycloak:
   admin-client-id: admin-cli
   user-realm: kajz
   user-client-id: backend-authservice
-  
+
+email:
+  client-id: "" # override these by setting env variables in ide
+  client-secret: ""
+  scope: ""
+  tenant-id: ""
+  username: ""
+
 springdoc:
   swagger-ui:
     path: /auth-service/swagger-ui.html
