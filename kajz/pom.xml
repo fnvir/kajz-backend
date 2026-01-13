@@ -21,6 +21,7 @@
   <modules>
     <module>service-registry</module>
     <module>auth-service</module>
+    <module>api-gateway</module>
   </modules>
 
   <developers>
