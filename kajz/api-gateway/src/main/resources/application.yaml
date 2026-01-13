@@ -101,5 +101,5 @@ management:
 
 logging:
   level:
-    com.netflix.discovery: warn
+    '[com.netflix.discovery]': warn
 
