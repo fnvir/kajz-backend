@@ -12,6 +12,15 @@ spring:
       max-in-memory-size: 15MB
       max-parts: 4
     
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis1234
+  cache:
+    redis:
+      key-prefix: api-gateway
+ 
   cloud:
     gateway:
       server:
@@ -36,6 +45,11 @@ spring:
             uri: lb://AUTHSERVICE
             predicates:
               - Path=/auth/**, /auth-service/v3/api-docs
+            filters:
+              - name: RequestRateLimiter
+                args:
+                  key-resolver: "#{@ipKeyResolver}"
+                  rate-limiter: "#{@redisRateLimiter}"
 
 eureka:
   instance:
