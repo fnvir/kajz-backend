@@ -1,0 +1,47 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: service_registry-tests
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - 'kajz/service-registry/src/**'
+      - 'kajz/service-registry/pom.xml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'kajz/service-registry/src/**'
+      - 'kajz/service-registry/pom.xml'
+  workflow_dispatch:
+      inputs:
+        log-level:
+          description: 'Log level'
+          required: true
+          default: 'info'
+          type: choice
+          options: [info, debug, trace]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kajz/service-registry
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up JDK 25
+      uses: actions/setup-java@v5
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+        cache-dependency-path: 'kajz/service-registry/pom.xml'
+    - name: Build and Test with Maven
+      run: mvn -B clean verify
