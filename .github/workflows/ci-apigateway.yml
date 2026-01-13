@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: kajz
+        working-directory: kajz/api-gateway
     steps:
     - uses: actions/checkout@v6
     - name: Set up JDK 25
@@ -34,5 +34,6 @@ jobs:
         java-version: '25'
         distribution: 'temurin'
         cache: maven
+        cache-dependency-path: 'kajz/api-gateway/pom.xml'
     - name: Build and Test with Maven
-      run: mvn -B -pl api-gateway -am clean verify
+      run: mvn -B clean verify
