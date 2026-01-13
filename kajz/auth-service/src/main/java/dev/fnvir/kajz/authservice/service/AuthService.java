@@ -77,7 +77,7 @@ public class AuthService {
         context.setVariable("otp", otp);
         String emailContent = templateEngine.process("password-reset-email", context);
         // send email
-        emailService.sendEmailAsync(req.email(), "Verify your account", emailContent, true);
+        emailService.sendEmailAsync(req.email(), "Reset your password", emailContent, true);
     }
     
     public void resetPassword(@Valid ResetPasswordRequest req) {
