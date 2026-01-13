@@ -1,0 +1,38 @@
+name: apigateway-tests
+
+on:
+  push:
+    branches: [ "**" ]
+    paths:
+      - 'kajz/api-gateway/src/**'
+      - 'kajz/api-gateway/pom.xml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'kajz/api-gateway/src/**'
+      - 'kajz/api-gateway/pom.xml'
+  workflow_dispatch:
+      inputs:
+        log-level:
+          description: 'Log level'
+          required: true
+          default: 'info'
+          type: choice
+          options: [info, debug, trace]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kajz
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up JDK 25
+      uses: actions/setup-java@v5
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build and Test with Maven
+      run: mvn -B -pl api-gateway -am clean verify
