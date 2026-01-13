@@ -126,6 +126,41 @@ services:
       timeout: 5s
       retries: 5
 
+  auth-service:
+    build: auth-service
+    container_name: auth-service-container
+    hostname: auth-service
+    environment:
+      KEYCLOAK_SERVER_URL: http://host.docker.internal:8444
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      EMAIL_CLIENT_ID: ${EMAIL_CLIENT_ID}
+      EMAIL_CLIENT_SECRET: ${EMAIL_CLIENT_SECRET}
+      EMAIL_TENANT_ID: ${EMAIL_TENANT_ID}
+      EMAIL_SCOPE: ${EMAIL_SCOPE}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      SERVER_PORT: 8080
+    ports:
+      - "${AUTH_SERVICE_HOST_PORT}:8080"
+    networks:
+      - backend_network
+    depends_on:
+      - service-registry
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 300M
+        limits:
+          cpus: '1'
+          memory: 1G
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 volumes:
   redis_data:
 
