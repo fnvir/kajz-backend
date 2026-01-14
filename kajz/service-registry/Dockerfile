@@ -38,5 +38,10 @@ EXPOSE 8080
 RUN useradd -r -s /bin/false spring
 USER spring
 
+
+# Execute the AOT cache training run
+# https://docs.spring.io/spring-boot/reference/packaging/aot-cache.html#packaging.aot-cache.aot-cache
+RUN java -XX:AOTCacheOutput=app.aot -Dspring.context.exit=onRefresh org.springframework.boot.loader.launch.JarLauncher
+
 # Run the application
-ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["java", "-XX:AOTCache=app.aot", "org.springframework.boot.loader.launch.JarLauncher"]
