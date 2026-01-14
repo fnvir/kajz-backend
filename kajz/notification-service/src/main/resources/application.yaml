@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: NotificationService
+  
+  threads.virtual.enabled: true
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://host.docker.internal:8444/realms/kajz
+  
+  mongodb:
+    uri: mongodb://localhost:27017/
+    database: notificationdb
+  
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+
+  jackson:
+      mapper:
+        accept-case-insensitive-enums: true
+        
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: true
+    fetch-registry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+      
+springdoc:
+  swagger-ui:
+    path: /notification-service/swagger-ui.html
+  api-docs:
+    path: /notification-service/v3/api-docs
+
+server:
+  port: 8082
+
+management:
+  endpoint:
+    health:
+      access: read-only
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.netflix.discovery: warn
+    org.apache.kafka.clients.admin.internals: warn
