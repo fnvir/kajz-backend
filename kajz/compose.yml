@@ -174,8 +174,6 @@ services:
       - "${AUTH_SERVICE_HOST_PORT}:8080"
     networks:
       - backend_network
-    depends_on:
-      - service-registry
     deploy:
       resources:
         reservations:
