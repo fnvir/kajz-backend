@@ -1,0 +1,35 @@
+package dev.fnvir.kajz.notificationservice.service.event;
+
+import java.util.concurrent.CompletableFuture;
+
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.stereotype.Service;
+
+import dev.fnvir.kajz.notificationservice.config.KafkaTopicConfig;
+import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class NotificationEventProducer {
+    
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    
+    public CompletableFuture<SendResult<String, Object>> publishEmailNotification(@Valid EmailEvent emailDto) {
+        log.debug("Sending email notification to topic: {}", KafkaTopicConfig.EMAIL_TOPIC);
+        
+        return kafkaTemplate.send(KafkaTopicConfig.EMAIL_TOPIC, emailDto)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        log.debug("Email notification sent successfully: offset={}", result.getRecordMetadata().offset());
+                    } else {
+                        log.error("Failed to send email notification: {}", ex.getMessage());
+                    }
+                });
+    }
+
+}
