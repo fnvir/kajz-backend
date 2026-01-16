@@ -39,7 +39,7 @@ public class SecurityConfig {
                     .pathMatchers("/actuator/**", "/error")
                     .permitAll()
                     .anyExchange()
-                    .authenticated()
+                    .permitAll() // TODO: authenticate
             )
             .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
             .requestCache(requestCacheSpec -> requestCacheSpec.requestCache(NoOpServerRequestCache.getInstance()))

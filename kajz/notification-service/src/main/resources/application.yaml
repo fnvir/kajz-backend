@@ -86,7 +86,7 @@ eureka:
   instance:
     prefer-ip-address: true
   client:
-    enabled: true
+    enabled: false
     fetch-registry: true
     register-with-eureka: true
     serviceUrl:
@@ -117,5 +117,6 @@ management:
 
 logging:
   level:
+    dev.fnvir.kajz: debug
     com.netflix.discovery: warn
     org.apache.kafka.clients.admin.internals: warn
