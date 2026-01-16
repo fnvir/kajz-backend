@@ -82,6 +82,13 @@ email:
 #    client-secret: ${MS_CLIENT_SECRET}
 #    tenant-id: ${MS_TENANT_ID}
 
+sms:
+  twilio:
+    enabled: true
+    account-sid: ${TWILIO_ACC_SID} # use env var in ide to set
+    auth-token: ${TWILIO_AUTH_TOKEN}
+    phone-number: ${TWILIO_PHN_NUMBER}
+
 eureka:
   instance:
     prefer-ip-address: true

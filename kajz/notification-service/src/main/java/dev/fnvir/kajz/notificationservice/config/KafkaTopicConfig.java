@@ -9,11 +9,20 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
     
     public static final String EMAIL_TOPIC = "notification.email";
+    public static final String SMS_TOPIC = "notification.sms";
     
     @Bean
     NewTopic emailTopic() {
         return TopicBuilder
                 .name(EMAIL_TOPIC)
+                .partitions(3)
+                .build();
+    }
+    
+    @Bean
+    NewTopic smsTopic() {
+        return TopicBuilder
+                .name(SMS_TOPIC)
                 .partitions(3)
                 .build();
     }

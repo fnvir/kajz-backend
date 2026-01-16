@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
+import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
 import dev.fnvir.kajz.notificationservice.service.event.NotificationEventProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,6 +38,19 @@ public class NotificationPublishController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
     public Mono<ResponseEntity<Void>> sendEmailNotification(@RequestBody @Valid EmailEvent emailDto) {
         return Mono.fromFuture(notificationProducer.publishEmailNotification(emailDto))
+                .thenReturn(ResponseEntity.accepted().build());
+    }
+    
+    /**
+     * Send an SMS.
+     *
+     * @param smsDto the SMS request payload
+     * @return a response entity indicating the request was accepted (202 Accepted)
+     */
+    @PostMapping("/sms")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
+    public Mono<ResponseEntity<Void>> sendSmsNotification(@RequestBody @Valid SmsEvent smsDto) {
+        return Mono.fromFuture(notificationProducer.sendSmsNotification(smsDto))
                 .thenReturn(ResponseEntity.accepted().build());
     }
     

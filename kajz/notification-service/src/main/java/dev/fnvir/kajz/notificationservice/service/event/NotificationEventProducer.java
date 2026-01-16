@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dev.fnvir.kajz.notificationservice.config.KafkaTopicConfig;
 import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
+import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,19 @@ public class NotificationEventProducer {
                         log.error("Failed to send email notification: {}", ex.getMessage());
                     }
                 });
+    }
+    
+    public CompletableFuture<SendResult<String, Object>> sendSmsNotification(@Valid SmsEvent smsDto) {
+        log.debug("Sending SMS notification to topic: {}, recipient: {}", KafkaTopicConfig.SMS_TOPIC, smsDto.to());
+        
+        return kafkaTemplate.send(KafkaTopicConfig.SMS_TOPIC, smsDto)
+            .whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.debug("SMS notification sent successfully: offset={}", result.getRecordMetadata().offset());
+                } else {
+                    log.error("Failed to send SMS notification: {}", ex.getMessage());
+                }
+            });
     }
 
 }
