@@ -21,7 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 @RequiredArgsConstructor
 public class EmailEventListener {
     
-    private final EmailService emailService;
+    private final EmailSenderService emailService;
     private final JsonMapper jsonMapper;
     
     @KafkaListener(topics = KafkaTopicConfig.EMAIL_TOPIC, groupId = "notification-service-group")

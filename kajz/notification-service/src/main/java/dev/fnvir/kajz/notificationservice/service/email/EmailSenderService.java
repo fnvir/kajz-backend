@@ -21,7 +21,7 @@ import reactor.util.retry.Retry;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailService {
+public class EmailSenderService {
     
     private final JavaMailSender emailSender;
     private final EmailProperties emailProperties;
