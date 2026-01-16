@@ -58,6 +58,13 @@ spring:
         spring.json.trusted.packages: "*"
         spring.json.use.type.headers: false
 #        spring.json.value.default.type: com.fasterxml.jackson.databind.node.ObjectNode
+  
+  webflux:
+    apiversion:
+      default: 1
+      supported: 1
+      use:
+        header: X-API-Version
 
 email:
   provider: gmail
