@@ -36,7 +36,24 @@ spring:
   jackson:
       mapper:
         accept-case-insensitive-enums: true
-        
+
+
+email:
+  provider: gmail
+  username: ${MAIL_USERNAME} # use env var in ide to set
+  password: ${MAIL_PASSWORD}
+  sender-address: ${MAIL_ADDRESS}
+  properties:
+    smtp:
+      auth: true
+      connectiontimeout: 5000
+      starttls:
+        enable: true
+#  microsoft:
+#    client-id: ${MS_CLIENT_ID}
+#    client-secret: ${MS_CLIENT_SECRET}
+#    tenant-id: ${MS_TENANT_ID}
+
 eureka:
   instance:
     prefer-ip-address: true
