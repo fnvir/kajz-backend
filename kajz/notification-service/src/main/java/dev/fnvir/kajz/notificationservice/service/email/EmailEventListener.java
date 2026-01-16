@@ -14,7 +14,7 @@ import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Service
@@ -22,7 +22,7 @@ import tools.jackson.databind.ObjectMapper;
 public class EmailEventListener {
     
     private final EmailService emailService;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     
     @KafkaListener(topics = KafkaTopicConfig.EMAIL_TOPIC, groupId = "notification-service-group")
     @RetryableTopic(
@@ -37,7 +37,7 @@ public class EmailEventListener {
             @Header(KafkaHeaders.OFFSET) long offset
     ) {
         try {
-            EmailEvent email = objectMapper.readValue(payload, EmailEvent.class);
+            EmailEvent email = jsonMapper.readValue(payload, EmailEvent.class);
             
             if (email == null) {
                 log.warn("Deserialization failed for email in topic {}, check headers for exception", topic);
