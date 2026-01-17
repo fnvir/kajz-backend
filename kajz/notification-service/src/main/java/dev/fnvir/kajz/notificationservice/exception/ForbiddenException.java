@@ -14,15 +14,15 @@ public class ForbiddenException extends ApiException {
     }
 
     public ForbiddenException(String message) {
-        super(HttpStatus.CONFLICT, message);
+        super(HttpStatus.FORBIDDEN, message);
     }
 
     public ForbiddenException(String message, Throwable cause) {
-        super(HttpStatus.CONFLICT, message, cause);
+        super(HttpStatus.FORBIDDEN, message, cause);
     }
 
     public ForbiddenException(Throwable cause) {
-        super(HttpStatus.CONFLICT, cause);
+        super(HttpStatus.FORBIDDEN, cause);
     }
     
 }
