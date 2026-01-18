@@ -3,6 +3,9 @@ spring:
     name: NotificationService
   
   threads.virtual.enabled: true
+  
+  profiles:
+    default: dev
 
   security:
     oauth2:
@@ -93,7 +96,7 @@ eureka:
   instance:
     prefer-ip-address: true
   client:
-    enabled: false
+    enabled: true
     fetch-registry: true
     register-with-eureka: true
     serviceUrl:
@@ -124,6 +127,6 @@ management:
 
 logging:
   level:
-    dev.fnvir.kajz: debug
+    dev.fnvir.kajz: info
     com.netflix.discovery: warn
-    org.apache.kafka.clients.admin.internals: warn
+    org.apache.kafka: warn

@@ -1,0 +1,15 @@
+spring:
+ jpa:
+    show-sql: false
+
+sms:
+  twilio:
+    enabled: false
+
+eureka:
+  client:
+    enabled: false
+    
+springdoc:
+  swagger-ui:
+    enabled: false      
