@@ -71,8 +71,8 @@ public class EmailSenderService {
         .retryWhen(Retry.backoff(2, Duration.ofSeconds(30))
                 .filter(e -> e instanceof MessagingException))
         .doOnSuccess(_ -> log.debug("Email asynchronously sent successfully to: {}", to))
-        .doOnError(MessagingException.class, e -> log.error("Failed to send email", e))
-        .doOnError(Throwable.class, e -> log.error("Unexpected error while sending email", e))
+        .doOnError(MessagingException.class, e -> log.error("Failed to send email", e.getMessage()))
+        .doOnError(Throwable.class, e -> log.error("Unexpected error while sending email", e.getMessage()))
         .onErrorReturn(false);
     }
 
