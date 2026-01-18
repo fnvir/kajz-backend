@@ -15,9 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import dev.fnvir.kajz.notificationservice.config.EmailProperties;
 import dev.fnvir.kajz.notificationservice.config.TwilioConfig;
 import dev.fnvir.kajz.notificationservice.controller.NotificationPublishController;
+import dev.fnvir.kajz.notificationservice.service.NotificationEventProducer;
 import dev.fnvir.kajz.notificationservice.service.email.EmailEventListener;
 import dev.fnvir.kajz.notificationservice.service.email.EmailSenderService;
-import dev.fnvir.kajz.notificationservice.service.event.NotificationEventProducer;
 import dev.fnvir.kajz.notificationservice.service.sms.SmsEventListener;
 import dev.fnvir.kajz.notificationservice.service.sms.SmsSenderService;
 

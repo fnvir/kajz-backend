@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
-import dev.fnvir.kajz.notificationservice.service.event.NotificationEventProducer;
+import dev.fnvir.kajz.notificationservice.service.NotificationEventProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

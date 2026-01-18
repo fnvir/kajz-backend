@@ -32,8 +32,8 @@ import dev.fnvir.kajz.notificationservice.TestcontainersConfiguration;
 import dev.fnvir.kajz.notificationservice.config.SecurityConfig;
 import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
+import dev.fnvir.kajz.notificationservice.service.NotificationEventProducer;
 import dev.fnvir.kajz.notificationservice.service.email.EmailSenderService;
-import dev.fnvir.kajz.notificationservice.service.event.NotificationEventProducer;
 import dev.fnvir.kajz.notificationservice.service.sms.SmsSenderService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

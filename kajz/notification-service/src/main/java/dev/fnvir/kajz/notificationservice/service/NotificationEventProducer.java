@@ -1,4 +1,4 @@
-package dev.fnvir.kajz.notificationservice.service.event;
+package dev.fnvir.kajz.notificationservice.service;
 
 import java.util.concurrent.CompletableFuture;
 

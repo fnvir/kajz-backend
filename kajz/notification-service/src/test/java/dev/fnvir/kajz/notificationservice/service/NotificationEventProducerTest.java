@@ -1,4 +1,4 @@
-package dev.fnvir.kajz.notificationservice.service.event;
+package dev.fnvir.kajz.notificationservice.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,6 +31,7 @@ import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
+import dev.fnvir.kajz.notificationservice.service.NotificationEventProducer;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("NotificationEventProducer Unit Tests")

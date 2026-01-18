@@ -35,7 +35,7 @@ import dev.fnvir.kajz.notificationservice.TestcontainersConfiguration;
 import dev.fnvir.kajz.notificationservice.config.KafkaTopicConfig;
 import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
-import dev.fnvir.kajz.notificationservice.service.event.NotificationEventProducer;
+import dev.fnvir.kajz.notificationservice.service.NotificationEventProducer;
 
 @SpringBootTest
 @ActiveProfiles("test")
