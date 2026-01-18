@@ -1,11 +1,13 @@
 package dev.fnvir.kajz.notificationservice.service.event;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -26,7 +28,9 @@ import org.springframework.kafka.support.SendResult;
 
 import dev.fnvir.kajz.notificationservice.config.KafkaTopicConfig;
 import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
+import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
+import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("NotificationEventProducer Unit Tests")
@@ -131,6 +135,65 @@ class NotificationEventProducerTest {
 
             Assertions.assertThat(result).isCompletedExceptionally();
         }
+    }
+    
+    @Nested
+    @DisplayName("Push Notification Tests")
+    class PushNotificationTests {
+
+        @Captor
+        private ArgumentCaptor<String> keyCaptor;
+
+        @Test
+        @DisplayName("Should publish push notification with correct key and topic")
+        void shouldPublishPushNotificationWithCorrectKeyAndTopic() {
+            UUID userId = UUID.randomUUID();
+            PushNotificationEvent event = createValidPushEvent(userId, RecipientRole.WORKER);
+            String expectedKey = userId + "_WORKER";
+
+            CompletableFuture<SendResult<String, Object>> future = createSuccessfulSendResult(
+                    KafkaTopicConfig.PUSH_TOPIC, 0, 999L);
+            
+            when(kafkaTemplate.send(eq(KafkaTopicConfig.PUSH_TOPIC), anyString(), any()))
+                    .thenReturn(future);
+
+            CompletableFuture<SendResult<String, Object>> result = producer.sendPushNotification(event);
+
+            Assertions.assertThat(result).isCompleted();
+            
+            verify(kafkaTemplate).send(
+                eq(KafkaTopicConfig.PUSH_TOPIC), 
+                keyCaptor.capture(), 
+                messageCaptor.capture()
+            );
+            
+            Assertions.assertThat(keyCaptor.getValue()).isEqualTo(expectedKey);
+            Assertions.assertThat(messageCaptor.getValue()).isEqualTo(event);
+        }
+
+        @Test
+        @DisplayName("Should handle logging and completion on Kafka failure")
+        void shouldHandleKafkaFailureForPush() {
+            PushNotificationEvent event = createValidPushEvent(UUID.randomUUID(), RecipientRole.CLIENT);
+            CompletableFuture<SendResult<String, Object>> failedFuture = new CompletableFuture<>();
+            failedFuture.completeExceptionally(new RuntimeException("Broker Timeout"));
+            
+            when(kafkaTemplate.send(eq(KafkaTopicConfig.PUSH_TOPIC), anyString(), any()))
+                    .thenReturn(failedFuture);
+
+            CompletableFuture<SendResult<String, Object>> result = producer.sendPushNotification(event);
+
+            Assertions.assertThat(result).isCompletedExceptionally();
+        }
+    }
+
+    private PushNotificationEvent createValidPushEvent(UUID userId, RecipientRole role) {
+        PushNotificationEvent event = new PushNotificationEvent();
+        event.setUserId(userId);
+        event.setRecipientRole(role);
+        event.setTitle("Test Title");
+        event.setBody("Test Body");
+        return event;
     }
 
     private EmailEvent createValidEmailEvent() {

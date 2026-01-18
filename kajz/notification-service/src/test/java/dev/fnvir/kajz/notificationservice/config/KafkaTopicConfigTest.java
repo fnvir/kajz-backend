@@ -1,7 +1,9 @@
 package dev.fnvir.kajz.notificationservice.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +35,12 @@ class KafkaTopicConfigTest {
         @DisplayName("Should have correct SMS topic name")
         void shouldHaveCorrectSmsTopicName() {
             assertEquals(KafkaTopicConfig.SMS_TOPIC, "notification.sms");
+        }
+        
+        @Test
+        @DisplayName("Should have correct Push notification topic name")
+        void shouldHaveCorrectPushTopicName() {
+            assertEquals(KafkaTopicConfig.PUSH_TOPIC, "notification.push");
         }
     }
 
@@ -77,18 +85,42 @@ class KafkaTopicConfigTest {
             assertEquals(smsTopic.numPartitions(), 3);
         }
     }
+    
+    @Nested
+    @DisplayName("Push Topic Bean Tests")
+    class PushNotificationTopicBeanTests {
+        
+        @Test
+        @DisplayName("Should create Push topic with correct name")
+        void shouldCreatePushTopicWithCorrectName() {
+            NewTopic pushTopic = kafkaTopicConfig.pushTopic();
+            
+            assertEquals(pushTopic.name(), "notification.push");
+        }
+        
+        @Test
+        @DisplayName("Should create Push topic with 3 partitions")
+        void shouldCreatePushTopicWith3Partitions() {
+            NewTopic topic = kafkaTopicConfig.pushTopic();
+            
+            assertEquals(topic.numPartitions(), 3);
+        }
+    }
 
     @Nested
     @DisplayName("Topic Independence Tests")
     class TopicIndependenceTests {
 
         @Test
-        @DisplayName("Email and SMS topics should have different names")
+        @DisplayName("All topics should have different names")
         void emailAndSmsTopicsShouldHaveDifferentNames() {
             NewTopic emailTopic = kafkaTopicConfig.emailTopic();
             NewTopic smsTopic = kafkaTopicConfig.smsTopic();
+            NewTopic pushTopic = kafkaTopicConfig.pushTopic();
 
-            assertNotEquals(emailTopic.name(), smsTopic.name());
+            List<String> allTopics = List.of(emailTopic.name(), smsTopic.name(), pushTopic.name());
+            
+            assertTrue(allTopics.stream().distinct().count() == allTopics.size());
         }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dev.fnvir.kajz.notificationservice.config.KafkaTopicConfig;
 import dev.fnvir.kajz.notificationservice.dto.event.EmailEvent;
+import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.dto.event.SmsEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,23 @@ public class NotificationEventProducer {
                     log.debug("SMS notification sent successfully: offset={}", result.getRecordMetadata().offset());
                 } else {
                     log.error("Failed to send SMS notification: {}", ex.getMessage());
+                }
+            });
+    }
+
+    public CompletableFuture<SendResult<String, Object>> sendPushNotification(@Valid PushNotificationEvent notificationEvent) {
+        String key = String.join(
+            "_",
+            notificationEvent.getUserId()+"", // userId+role as key to keep ordering per-user
+            notificationEvent.getRecipientRole().name()
+        );
+        
+        return kafkaTemplate.send(KafkaTopicConfig.PUSH_TOPIC, key, notificationEvent)
+            .whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.debug("Push notification sent successfully: offset={}", result.getRecordMetadata().offset());
+                } else {
+                    log.error("Failed to send Push notification: {}", ex.getMessage());
                 }
             });
     }
