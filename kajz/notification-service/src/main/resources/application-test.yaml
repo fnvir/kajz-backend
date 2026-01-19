@@ -1,5 +1,7 @@
 spring:
- jpa:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
     show-sql: false
 
 sms:
@@ -11,5 +13,11 @@ eureka:
     enabled: false
     
 springdoc:
+  api-docs:
+    enabled: false
   swagger-ui:
-    enabled: false      
+    enabled: false
+
+logging:
+  level:
+    root: warn

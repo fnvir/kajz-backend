@@ -316,6 +316,10 @@
 <!--                        <include>**/*Test.java</include>-->
 <!--                        <include>**/*Tests.java</include>-->
 <!--                    </includes>-->
+                    <argLine>
+                        -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        -Xshare:off
+                    </argLine>
                 </configuration>
             </plugin>
         </plugins>
