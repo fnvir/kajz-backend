@@ -29,7 +29,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import dev.fnvir.kajz.notificationservice.TestcontainersConfiguration;
-import dev.fnvir.kajz.notificationservice.config.SecurityConfig;
 import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
 import dev.fnvir.kajz.notificationservice.service.NotificationEventProducer;
@@ -39,7 +38,7 @@ import dev.fnvir.kajz.notificationservice.service.sms.SmsSenderService;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import({TestcontainersConfiguration.class})
 @ActiveProfiles("test")
-//@EnabledIfEnvironmentVariable(named = "ENABLE_TC", matches = "true")
+@EnabledIfEnvironmentVariable(named = "ENABLE_TC", matches = "true")
 @AutoConfigureWebTestClient
 @DisplayName("NotificationPublishController Integration Tests")
 class NotificationPublishControllerIntegrationTest {

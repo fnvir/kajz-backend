@@ -16,8 +16,7 @@ import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
-    
-    Page<Notification> findByUserIdAndRecipientType(UUID userId, RecipientRole recipientRole, Pageable pageable);
+    Page<Notification> findByUserIdAndRecipientRole(UUID userId, RecipientRole recipientRole, Pageable pageable);
     
     @Query("""
             FROM Notification n
