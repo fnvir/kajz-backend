@@ -14,6 +14,8 @@ import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -23,6 +25,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class PushNotificationEventListener {
     
     private final NotificationService notificationService;
+    private final PushNotificationSseService sseService;
     private final JsonMapper jsonMapper;
     
     @KafkaListener(topics = KafkaTopicConfig.PUSH_TOPIC)
@@ -37,16 +40,24 @@ public class PushNotificationEventListener {
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset
     ) {
-        try {
-            log.debug("Received push notification from topic: {}, partition: {}, offset: {}", topic, partition, offset);
-            var notificationEvent = jsonMapper.readValue(payload, PushNotificationEvent.class);
-            // save in db
-            notificationService.saveNotification(notificationEvent);
-            
-        } catch (JacksonException e) {
-            log.error("Skipping event! Unable to map event in topic: {}, partition: {}, offset: {} to type {}.",
-                    topic, partition, offset, PushNotificationEvent.class.getName());
-        }
+        log.debug("Received push notification from topic: {}, partition: {}, offset: {}", topic, partition, offset);
+        Mono.fromCallable(() -> jsonMapper.readValue(payload, PushNotificationEvent.class))
+            .subscribeOn(Schedulers.boundedElastic())
+            .onErrorResume(JacksonException.class, _ -> {
+                log.error(
+                    "Skipping event! Unable to map event in topic: {}, partition: {}, offset: {} to type {}.",
+                    topic, partition, offset, PushNotificationEvent.class.getName()
+                );
+                return Mono.empty(); // ACK
+            })
+            .flatMap(event -> 
+                Mono.fromCallable(() -> notificationService.saveNotification(event)) // save in db
+                    .subscribeOn(Schedulers.boundedElastic())
+            ).flatMap(notification -> 
+                Mono.fromRunnable(() -> sseService.publish(notification))
+                    .onErrorResume(_ -> Mono.empty()) // ignore SSE publish errors
+            )
+            .block();
     }
     
     @DltHandler
