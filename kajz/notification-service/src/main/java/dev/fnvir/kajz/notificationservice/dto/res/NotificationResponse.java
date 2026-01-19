@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
+import lombok.Builder;
 
 /**
  * Payload for notification response.
@@ -22,6 +23,7 @@ import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
  * @param archived      the archived status of the notification
  * @param createdAt     the timestamp when the notification was created
  */
+@Builder
 public record NotificationResponse (
         UUID id,
         UUID userId,

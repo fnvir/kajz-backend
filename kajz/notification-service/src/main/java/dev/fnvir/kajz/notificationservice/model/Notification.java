@@ -95,7 +95,7 @@ public class Notification {
     
     /** Creation timestamp. */
     @CreationTimestamp
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
     
     /** Last update timestamp. */

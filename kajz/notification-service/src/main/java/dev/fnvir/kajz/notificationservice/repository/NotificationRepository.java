@@ -20,15 +20,15 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     
     @Query("""
             FROM Notification n
-            WHERE 
+            WHERE
                n.userId = :userId
              AND
                n.recipientRole = :recipientRole
              AND
                n.createdAt < :cursor
-            ORDER BY createdAt DESC
+            ORDER BY n.createdAt DESC
             """)
-    List<Notification> findByUserIdAfterCursor(
+    List<Notification> findByUserIdBeforeCursor(
             @NonNull UUID userId,
             @NonNull RecipientRole recipientRole,
             @NonNull Instant cursor,
