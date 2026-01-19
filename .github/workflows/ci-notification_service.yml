@@ -28,7 +28,7 @@ jobs:
         cache: maven
         cache-dependency-path: 'kajz/notification-service/pom.xml'
     - name: Build and Test with Maven
-      run: mvn -B clean verify
+      run: mvn -B clean verify -Dspring.profiles.active=test
       env:
         TESTCONTAINERS_RYUK_DISABLED: true
         ENABLE_TC: true
