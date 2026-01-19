@@ -141,6 +141,23 @@ public class NotificationRepositoryTest {
                     .extracting(Notification::getRecipientRole)
                     .isEqualTo(RecipientRole.WORKER);
         }
+        
+        @Test
+        @DisplayName("should return all roles when recipientRole is null")
+        void shouldReturnAllRolesWhenRecipientRoleIsNull() {
+            Notification worker = createAndSaveNewNotification(userId, RecipientRole.WORKER, "Worker Role", cursor.minus(2, ChronoUnit.HOURS));
+            Notification client = createAndSaveNewNotification(userId, RecipientRole.CLIENT, "Client Role", cursor.minus(1, ChronoUnit.HOURS));
+            notificationRepository.flush();
+
+            List<Notification> result = notificationRepository.findByUserIdBeforeCursor(
+                    userId, null, cursor, Limit.of(10)
+            );
+
+            Assertions.assertThat(result)
+                    .hasSize(2)
+                    .extracting(Notification::getTitle)
+                    .containsExactly(client.getTitle(), worker.getTitle());
+        }
 
         @Test
         @DisplayName("should return empty list when no notifications before cursor")

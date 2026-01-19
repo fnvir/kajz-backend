@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,14 +24,14 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
             WHERE
                n.userId = :userId
              AND
-               n.recipientRole = :recipientRole
+               n.recipientRole = COALESCE(:recipientRole, n.recipientRole)
              AND
                n.createdAt < :cursor
             ORDER BY n.createdAt DESC
             """)
     List<Notification> findByUserIdBeforeCursor(
             @NonNull UUID userId,
-            @NonNull RecipientRole recipientRole,
+            @Nullable RecipientRole recipientRole,
             @NonNull Instant cursor,
             Limit limit
     );
