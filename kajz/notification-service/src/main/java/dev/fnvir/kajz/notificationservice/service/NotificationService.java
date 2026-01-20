@@ -11,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.dto.res.CursorPageResponse;
 import dev.fnvir.kajz.notificationservice.dto.res.NotificationResponse;
+import dev.fnvir.kajz.notificationservice.exception.ForbiddenException;
+import dev.fnvir.kajz.notificationservice.exception.NotFoundException;
 import dev.fnvir.kajz.notificationservice.mapper.NotificationMapper;
+import dev.fnvir.kajz.notificationservice.model.Notification;
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
 import dev.fnvir.kajz.notificationservice.repository.NotificationRepository;
 import jakarta.validation.Valid;
@@ -44,6 +47,27 @@ public class NotificationService {
                 .toList();
         Instant nextCursor = res == null || res.isEmpty() ? null : res.getLast().createdAt();
         return new CursorPageResponse<>(res, nextCursor);
+    }
+    
+    @Transactional
+    public NotificationResponse markAsRead(UUID notificationId, UUID userId) {
+        var notification = getNotificationWithOwnerValidation(notificationId, userId);
+        notification.setRead(true);
+        notification = notificationRepository.save(notification);
+        return notificationMapper.toResponseDto(notification);
+    }
+    
+    @Transactional
+    public void deleteNotification(UUID notificationId, UUID userId) {
+        var notification = getNotificationWithOwnerValidation(notificationId, userId);
+        notificationRepository.delete(notification);
+    }
+    
+    private Notification getNotificationWithOwnerValidation(UUID notificationId, UUID userId) {
+        var notification = notificationRepository.findById(notificationId).orElseThrow(NotFoundException::new);
+        if(!notification.getUserId().equals(userId))
+            throw new ForbiddenException();
+        return notification;
     }
 
 }

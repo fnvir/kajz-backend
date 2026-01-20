@@ -4,16 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,6 +33,8 @@ import org.springframework.data.domain.Limit;
 import dev.fnvir.kajz.notificationservice.dto.event.PushNotificationEvent;
 import dev.fnvir.kajz.notificationservice.dto.res.CursorPageResponse;
 import dev.fnvir.kajz.notificationservice.dto.res.NotificationResponse;
+import dev.fnvir.kajz.notificationservice.exception.ForbiddenException;
+import dev.fnvir.kajz.notificationservice.exception.NotFoundException;
 import dev.fnvir.kajz.notificationservice.mapper.NotificationMapper;
 import dev.fnvir.kajz.notificationservice.model.Notification;
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
@@ -44,9 +50,14 @@ public class NotificationServiceTest {
     
     private NotificationService notificationService;
     
+    private UUID testUserId;
+    private Notification testNotification;
+    
     @BeforeEach
     void setup() {
         notificationService = new NotificationService(notificationRepository, NotificationMapper.INSTANCE);
+        testUserId = UUID.randomUUID();
+        testNotification = notification(testUserId, Instant.now().minusSeconds(3600 * (int) (Math.random() * 100)));
     }
     
     @Nested
@@ -58,7 +69,7 @@ public class NotificationServiceTest {
         void shouldSuccessfullySaveNotification() {
             var event = createPushNotificationEvent();
             
-            when(notificationRepository.saveAndFlush(any(Notification.class))).then(e -> mockPersist(e.getArgument(0)));
+            when(notificationRepository.saveAndFlush(any(Notification.class))).then(e -> mockSave(e.getArgument(0)));
             
             NotificationResponse result = notificationService.saveNotification(event);
             
@@ -71,27 +82,6 @@ public class NotificationServiceTest {
             assertFalse(result.archived());
             
             verify(notificationRepository).saveAndFlush(any(Notification.class));
-        }
-        
-        // helpers
-        
-        Notification mockPersist(Notification notification) {
-            if (notification.getUserId() == null) {
-                throw new ConstraintViolationException("userId cannot be null", Set.of());
-            }
-            if (notification.getRecipientRole() == null) {
-                throw new ConstraintViolationException("recipientRole cannot be null", Set.of());
-            }
-            if (notification.getTitle() == null) {
-                throw new ConstraintViolationException("title cannot be null", Set.of());
-            }
-            if (notification.getMetadata() != null && notification.getMetadata().size() > 10) {
-                throw new ConstraintViolationException("metadata size cannot exceed 10", Set.of());
-            }
-            notification.setId(UUID.randomUUID());
-            notification.setCreatedAt(Instant.now());
-            notification.setUpdatedAt(Instant.now());
-            return notification;
         }
         
         private PushNotificationEvent createPushNotificationEvent() {
@@ -108,16 +98,11 @@ public class NotificationServiceTest {
     @Nested
     @DisplayName("Get Notifications Tests")
     class GetNotificationsTests {
-
-        private UUID testUserId;
         private Instant testCursor;
-        private Notification testNotification;
 
         @BeforeEach
         void setUpGetTests() {
-            testUserId = UUID.randomUUID();
             testCursor = Instant.now();
-            testNotification = notification(testUserId, testCursor.minusSeconds(1000));
         }
         
         @Test
@@ -274,17 +259,139 @@ public class NotificationServiceTest {
                 any(Limit.class)
             );
         }
+    }
+    
+    @Nested
+    @DisplayName("Mark Notifications as Read Tests")
+    class ReadNotificationsTest {
         
-        private Notification notification(UUID userId, Instant createdAt) {
-            var n = new Notification();
-            n.setId(UUID.randomUUID());
-            n.setUserId(userId);
-            n.setRecipientRole(RecipientRole.CLIENT);
-            n.setTitle("Title");
-            n.setBody("Body");
-            n.setCreatedAt(createdAt);
-            return n;
+        @Test
+        @DisplayName("Users should be able to mark own notifications as read")
+        void shouldAllowMarkingOwnNotificationAsRead() {
+            UUID testNotificationId = testNotification.getId();
+            
+            when(notificationRepository.findById(eq(testNotificationId)))
+                .thenReturn(Optional.of(testNotification));
+            
+            when(notificationRepository.save(any(Notification.class)))
+                .then(e -> mockSave(e.getArgument(0)));
+            
+            var result = notificationService.markAsRead(testNotificationId, testUserId);
+            
+            assertTrue(result.read());
+            
+            verify(notificationRepository).save(any(Notification.class));
         }
+        
+        @Test
+        @DisplayName("Users should not be able to mark other's notifications as read")
+        void shouldThrowForbiddenExceptionWhenMarkingOthersNotificationAsRead() {
+            // set notification owner to random id
+            testNotification.setUserId(UUID.randomUUID());
+            UUID testNotificationId = testNotification.getId();
+            
+            when(notificationRepository.findById(eq(testNotificationId)))
+                .thenReturn(Optional.of(testNotification));
+            
+            assertThrows(ForbiddenException.class,
+                    () -> notificationService.markAsRead(testNotificationId, testUserId));
+            
+            verify(notificationRepository, never()).save(any(Notification.class));
+        }
+        
+        @Test
+        @DisplayName("Should throw NotFoundException when id matches no notification")
+        void shouldThrowNotFoundExceptionWhenIncorrectNotificationId() {
+            // set random notification id
+            UUID testNotificationId = UUID.randomUUID();
+            
+            when(notificationRepository.findById(eq(testNotificationId)))
+                .thenReturn(Optional.empty());
+            
+            assertThrows(NotFoundException.class,
+                    () -> notificationService.markAsRead(testNotificationId, testUserId));
+            
+            verify(notificationRepository, never()).save(any(Notification.class));
+        }
+        
+    }
+    
+    @Nested
+    @DisplayName("Delete Notification Tests")
+    class DeleteNotificationsTest {
+        
+        @Test
+        @DisplayName("Users should be allowed to delete own notifications")
+        void shouldAllowMDeletingOwnNotifcations() {
+            UUID testNotificationId = testNotification.getId();
+            
+            when(notificationRepository.findById(eq(testNotificationId)))
+                .thenReturn(Optional.of(testNotification));
+            
+            doNothing().when(notificationRepository).delete(eq(testNotification));
+            
+            notificationService.deleteNotification(testNotificationId, testUserId);
+            
+            verify(notificationRepository).delete(eq(testNotification));
+        }
+        
+        @Test
+        @DisplayName("Users should not be able to delete other's notifications")
+        void shouldThrowForbiddenExceptionWhenDeletingOthersNotifications() {
+            // set notification owner to random id
+            testNotification.setUserId(UUID.randomUUID());
+            UUID testNotificationId = testNotification.getId();
+            
+            when(notificationRepository.findById(eq(testNotificationId)))
+                .thenReturn(Optional.of(testNotification));
+            
+            assertThrows(ForbiddenException.class,
+                    () -> notificationService.markAsRead(testNotificationId, testUserId));
+            
+            verify(notificationRepository, never()).delete(any(Notification.class));
+        }
+        
+    }
+    
+    // helper methods
+    
+    private Notification notification(UUID userId, Instant createdAt) {
+        var n = new Notification();
+        n.setId(UUID.randomUUID());
+        n.setUserId(userId);
+        n.setRecipientRole(RecipientRole.CLIENT);
+        n.setTitle("Title");
+        n.setBody("Body");
+        n.setRead(false);
+        n.setArchived(false);
+        n.setCreatedAt(createdAt);
+        n.setUpdatedAt(createdAt);
+        return n;
+    }
+    
+    Notification mockSave(Notification notification) {
+        if (notification.getUserId() == null) {
+            throw new ConstraintViolationException("userId cannot be null", Set.of());
+        }
+        if (notification.getRecipientRole() == null) {
+            throw new ConstraintViolationException("recipientRole cannot be null", Set.of());
+        }
+        if (notification.getTitle() == null) {
+            throw new ConstraintViolationException("title cannot be null", Set.of());
+        }
+        if (notification.getMetadata() != null && notification.getMetadata().size() > 10) {
+            throw new ConstraintViolationException("metadata size cannot exceed 10", Set.of());
+        }
+        if (notification.getId() == null) {
+            notification.setId(UUID.randomUUID());
+        }
+        if(notification.getCreatedAt() == null) {
+            notification.setCreatedAt(Instant.now());
+        }
+        // always set latest update timestamp
+        notification.setUpdatedAt(Instant.now());
+        
+        return notification;
     }
     
 }

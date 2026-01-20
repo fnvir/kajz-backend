@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -249,6 +250,63 @@ public class NotificationControllerTest {
 
             verify(notificationService, never()).getNotificationsOfUser(any(), any(), any(), anyInt());
         }
+    }
+    
+    @Nested
+    @DisplayName("POST /notifications/{id}/read tests")
+    class MarkAsReadEndpointTest {
+        
+        @Test
+        @DisplayName("Should successfully mark user's own notification as read")
+        void shouldMarkAsReadWhenUserIsOwner() {
+            UUID testUserId = UUID.randomUUID();
+            UUID testNotificationId = UUID.randomUUID();
+            var notificationResponse = NotificationResponse.builder()
+                    .id(testNotificationId)
+                    .userId(testUserId)
+                    .recipientRole(RecipientRole.CLIENT)
+                    .title("test")
+                    .read(true)
+                    .createdAt(Instant.now())
+                    .build();
+            
+            when(notificationService.markAsRead(eq(testNotificationId), eq(testUserId)))
+                .thenReturn(notificationResponse);
+            
+            webTestClient
+                .mutateWith(mockUser(testUserId.toString()))
+                .post()
+                .uri("/notifications/{notificationId}/read", testNotificationId)
+                .exchangeSuccessfully()
+                .expectBody()
+                .jsonPath("$.read").isEqualTo(true);
+            
+            verify(notificationService).markAsRead(testNotificationId, testUserId);
+        }
+        
+    }
+    
+    @Nested
+    @DisplayName("DELTE /notifications/{id} tests")
+    class DeleteNotificationEndpointTest {
+        
+        @Test
+        @DisplayName("Should successfully delete user's own notification")
+        void shouldDeleteWhenUserIsOwner() {
+            UUID testUserId = UUID.randomUUID();
+            UUID testNotificationId = UUID.randomUUID();
+            
+            doNothing().when(notificationService).deleteNotification(any(UUID.class), any(UUID.class));
+            
+            webTestClient
+                .mutateWith(mockUser(testUserId.toString()))
+                .delete()
+                .uri("/notifications/{notificationId}", testNotificationId)
+                .exchangeSuccessfully();
+            
+            verify(notificationService).deleteNotification(testNotificationId, testUserId);
+        }
+        
     }
 
     private NotificationResponse createNotificationResponse(UUID userId, RecipientRole role) {

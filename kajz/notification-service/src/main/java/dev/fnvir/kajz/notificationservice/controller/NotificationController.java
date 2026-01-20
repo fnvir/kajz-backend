@@ -3,9 +3,14 @@ package dev.fnvir.kajz.notificationservice.controller;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,6 +57,36 @@ public class NotificationController {
         return Mono.fromCallable(() ->
             notificationService.getNotificationsOfUser(userId, recipientRole, cursor, limit)
         ).subscribeOn(Schedulers.boundedElastic());
+    }
+    
+    /**
+     * Mark a notification as read.
+     *
+     * @param notificationId the ID of the notification to mark as read
+     * @return the updated notification
+     */
+    @PostMapping("/{notificationId}/read")
+    public Mono<NotificationResponse> markAsRead(@PathVariable UUID notificationId, Authentication authentication) {
+        UUID tokenUserId = UUID.fromString(authentication.getName());
+        return Mono.fromCallable(() ->
+                notificationService.markAsRead(notificationId, tokenUserId)
+        ).subscribeOn(Schedulers.boundedElastic());
+    }
+    
+    /**
+     * Delete a notification by its ID.
+     *
+     * @param notificationId the ID of the notification to delete
+     * @return a response entity with no content
+     */
+    @DeleteMapping("/{notificationId}")
+    public Mono<ResponseEntity<Void>> deleteNotification(@PathVariable UUID notificationId, Authentication authentication) {
+        return Mono.fromRunnable(() -> {
+            UUID tokenUserId = UUID.fromString(authentication.getName());
+            notificationService.deleteNotification(notificationId, tokenUserId);
+        })
+        .subscribeOn(Schedulers.boundedElastic())
+        .thenReturn(ResponseEntity.noContent().build());
     }
 
 }
