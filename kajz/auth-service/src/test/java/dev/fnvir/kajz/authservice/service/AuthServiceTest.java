@@ -143,7 +143,7 @@ class AuthServiceTest {
             
             authService.register(signupReq);
             
-            verify(emailService).sendEmailAsync(
+            verify(emailService).sendEmail(
                     eq(signupReq.email()),
                     eq("Verify your account"),
                     anyString(),
@@ -228,7 +228,7 @@ class AuthServiceTest {
 
             authService.resendVerificationEmail(req);
 
-            verify(emailService).sendEmailAsync(eq(TEST_EMAIL), anyString(), anyString(), eq(true));
+            verify(emailService).sendEmail(eq(TEST_EMAIL), anyString(), anyString(), eq(true));
         }
 
         @Test
@@ -245,7 +245,7 @@ class AuthServiceTest {
             var exceptionThrown = assertThrows(ConflictException.class, () -> authService.resendVerificationEmail(req));
             assertTrue(exceptionThrown.getMessage().equals("User's account is already verified."));
 
-            verify(emailService, never()).sendEmailAsync(anyString(), anyString(), anyString(), anyBoolean());
+            verify(emailService, never()).sendEmail(anyString(), anyString(), anyString(), anyBoolean());
         }
     }
     
@@ -280,7 +280,7 @@ class AuthServiceTest {
 
             verify(keycloakService).findByEmail(TEST_EMAIL);
             verify(otpService).generateAndSaveOtp(OtpType.PASSWORD_RECOVERY, TEST_EMAIL);
-            verify(emailService).sendEmailAsync(eq(TEST_EMAIL), anyString(), anyString(), eq(true));
+            verify(emailService).sendEmail(eq(TEST_EMAIL), anyString(), anyString(), eq(true));
         }
 
         @Test

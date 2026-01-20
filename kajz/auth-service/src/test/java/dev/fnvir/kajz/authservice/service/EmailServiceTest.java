@@ -1,138 +1,73 @@
 package dev.fnvir.kajz.authservice.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.javamail.JavaMailSender;
 
-import dev.fnvir.kajz.authservice.config.EmailProperties;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import dev.fnvir.kajz.authservice.dto.event.EmailEvent;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("EmailService Unit Tests")
-class EmailServiceTest {
+public class EmailServiceTest {
 
     @Mock
-    private JavaMailSender emailSender;
+    private KafkaEventProducer eventProducer;
 
-    @Mock
-    private EmailProperties emailProperties;
-
-    @Mock
-    private MimeMessage mimeMessage;
-
-    @Captor
-    private ArgumentCaptor<MimeMessage> messageCaptor;
-
+    @InjectMocks
     private EmailService emailService;
 
     private static final String TEST_EMAIL = "recipient@example.com";
     private static final String TEST_SUBJECT = "Test Subject";
     private static final String TEST_CONTENT = "<html><body>Test Content</body></html>";
-    private static final String SENDER_EMAIL = "sender@example.com";
 
-    @BeforeEach
-    void setUp() {
-        emailService = new EmailService(emailSender, emailProperties);
-    }
+    @Captor
+    private ArgumentCaptor<EmailEvent> emailEventCaptor;
 
     @Nested
-    @DisplayName("sendEmailAsync (single recipient) tests")
-    class SendEmailAsyncSingleRecipientTests {
+    @DisplayName("sendEmail tests")
+    class SendEmailTests {
 
         @Test
-        @DisplayName("Should send email to single recipient successfully")
-        void shouldSendEmailToSingleRecipientSuccessfully() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
+        @DisplayName("Should publish email event to Kafka successfully")
+        void shouldPublishEmailEventToKafkaSuccessfully() {
+            when(eventProducer.publishEmailNotification(any(EmailEvent.class)))
+                    .thenReturn(CompletableFuture.completedFuture(null));
 
-            emailService.sendEmailAsync(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
+            emailService.sendEmail(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
 
-            verify(emailSender).send(mimeMessage);
+            verify(eventProducer).publishEmailNotification(any(EmailEvent.class));
         }
 
         @Test
-        @DisplayName("Should create MimeMessage with correct properties")
-        void shouldCreateMimeMessageWithCorrectProperties() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
+        @DisplayName("Should create EmailEvent with correct properties for single recipient")
+        void shouldCreateEmailEventWithCorrectProperties() {
+            when(eventProducer.publishEmailNotification(any(EmailEvent.class)))
+                    .thenReturn(CompletableFuture.completedFuture(null));
 
-            emailService.sendEmailAsync(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
+            emailService.sendEmail(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
 
-            verify(emailSender).createMimeMessage();
-            verify(emailSender).send(any(MimeMessage.class));
-        }
+            verify(eventProducer).publishEmailNotification(emailEventCaptor.capture());
+            EmailEvent capturedEvent = emailEventCaptor.getValue();
 
-        @Test
-        @DisplayName("Should throw RuntimeException when email sending fails")
-        void shouldThrowRuntimeExceptionWhenEmailSendingFails() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
-            doThrow(new RuntimeException("Mail server error")).when(emailSender).send(any(MimeMessage.class));
-
-            assertThatThrownBy(() -> emailService.sendEmailAsync(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true))
-                    .isInstanceOf(RuntimeException.class);
-        }
-    }
-
-    @Nested
-    @DisplayName("sendEmailAsync (multiple recipients) tests")
-    class SendEmailAsyncMultipleRecipientsTests {
-
-        @Test
-        @DisplayName("Should send email to multiple recipients successfully")
-        void shouldSendEmailToMultipleRecipientsSuccessfully() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
-
-            List<String> recipients = List.of("user1@example.com", "user2@example.com");
-            List<String> cc = List.of("cc@example.com");
-            List<String> bcc = List.of("bcc@example.com");
-
-            emailService.sendEmailAsync(recipients, cc, bcc, TEST_SUBJECT, TEST_CONTENT, true, 1);
-
-            verify(emailSender).send(mimeMessage);
-        }
-
-        @Test
-        @DisplayName("Should handle null CC and BCC lists")
-        void shouldHandleNullCcAndBccLists() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
-
-            List<String> recipients = List.of(TEST_EMAIL);
-
-            emailService.sendEmailAsync(recipients, null, null, TEST_SUBJECT, TEST_CONTENT, true, 2);
-
-            verify(emailSender).send(mimeMessage);
-        }
-
-        @Test
-        @DisplayName("Should handle empty CC and BCC lists")
-        void shouldHandleEmptyCcAndBccLists() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
-
-            List<String> recipients = List.of(TEST_EMAIL);
-
-            emailService.sendEmailAsync(recipients, List.of(), List.of(), TEST_SUBJECT, TEST_CONTENT, false, 3);
-
-            verify(emailSender).send(mimeMessage);
+            Assertions.assertThat(capturedEvent.getTo()).containsExactly(TEST_EMAIL);
+            Assertions.assertThat(capturedEvent.getSubject()).isEqualTo(TEST_SUBJECT);
+            Assertions.assertThat(capturedEvent.getContent()).isEqualTo(TEST_CONTENT);
+            Assertions.assertThat(capturedEvent.isHtml()).isTrue();
+            Assertions.assertThat(capturedEvent.getPriority()).isEqualTo(2);
         }
 
     }
@@ -142,43 +77,56 @@ class EmailServiceTest {
     class EmailContentTests {
 
         @Test
-        @DisplayName("Should send HTML content when isHtml is true")
-        void shouldSendHtmlContentWhenIsHtmlTrue() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
+        @DisplayName("Should handle HTML content correctly")
+        void shouldHandleHtmlContentCorrectly() {
+            when(eventProducer.publishEmailNotification(any(EmailEvent.class)))
+                    .thenReturn(CompletableFuture.completedFuture(null));
 
-            emailService.sendEmailAsync(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
+            emailService.sendEmail(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
 
-            verify(emailSender).send(any(MimeMessage.class));
+            verify(eventProducer).publishEmailNotification(emailEventCaptor.capture());
+            EmailEvent capturedEvent = emailEventCaptor.getValue();
+
+            Assertions.assertThat(capturedEvent.getContent()).isEqualTo(TEST_CONTENT);
+            Assertions.assertThat(capturedEvent.isHtml()).isTrue();
         }
 
         @Test
-        @DisplayName("Should send plain text content when isHtml is false")
-        void shouldSendPlainTextContentWhenIsHtmlFalse() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
+        @DisplayName("Should handle plain text content correctly")
+        void shouldHandlePlainTextContentCorrectly() {
+            when(eventProducer.publishEmailNotification(any(EmailEvent.class)))
+                    .thenReturn(CompletableFuture.completedFuture(null));
 
             String plainText = "This is plain text content";
-            emailService.sendEmailAsync(TEST_EMAIL, TEST_SUBJECT, plainText, false);
+            emailService.sendEmail(TEST_EMAIL, TEST_SUBJECT, plainText, false);
 
-            verify(emailSender).send(any(MimeMessage.class));
+            verify(eventProducer).publishEmailNotification(emailEventCaptor.capture());
+            EmailEvent capturedEvent = emailEventCaptor.getValue();
+
+            Assertions.assertThat(capturedEvent.getContent()).isEqualTo(plainText);
+            Assertions.assertThat(capturedEvent.isHtml()).isFalse();
         }
     }
 
     @Nested
-    @DisplayName("Error handling tests")
-    class ErrorHandlingTests {
+    @DisplayName("EmailEvent validation tests")
+    class EmailEventValidationTests {
 
         @Test
-        @DisplayName("Should wrap MessagingException in RuntimeException")
-        void shouldWrapMessagingExceptionInRuntimeException() {
-            when(emailSender.createMimeMessage()).thenReturn(mimeMessage);
-            when(emailProperties.getUsername()).thenReturn(SENDER_EMAIL);
-            doThrow(new RuntimeException(new MessagingException("SMTP error")))
-                    .when(emailSender).send(any(MimeMessage.class));
+        @DisplayName("Should create valid EmailEvent with all required fields")
+        void shouldCreateValidEmailEventWithAllRequiredFields() {
+            when(eventProducer.publishEmailNotification(any(EmailEvent.class)))
+                    .thenReturn(CompletableFuture.completedFuture(null));
 
-            assertThatThrownBy(() -> emailService.sendEmailAsync(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true))
-                    .isInstanceOf(RuntimeException.class);
+            emailService.sendEmail(TEST_EMAIL, TEST_SUBJECT, TEST_CONTENT, true);
+
+            verify(eventProducer).publishEmailNotification(emailEventCaptor.capture());
+            EmailEvent capturedEvent = emailEventCaptor.getValue();
+
+            Assertions.assertThat(capturedEvent.getTo()).isNotEmpty();
+            Assertions.assertThat(capturedEvent.getSubject()).isNotBlank();
+            Assertions.assertThat(capturedEvent.getContent()).isNotBlank();
         }
+
     }
 }
