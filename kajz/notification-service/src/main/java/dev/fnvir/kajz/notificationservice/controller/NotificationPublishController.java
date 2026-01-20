@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 @Validated
 @Tag(name = "Notification Publish Controller (Admin Only)")
 @RestController
-@RequestMapping(path = "/notifications", version = "1")
+@RequestMapping(path = "/notifications/publish", version = "1")
 @RequiredArgsConstructor
 public class NotificationPublishController {
     
