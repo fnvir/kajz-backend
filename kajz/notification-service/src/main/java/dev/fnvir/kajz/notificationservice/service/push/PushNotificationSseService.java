@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 import dev.fnvir.kajz.notificationservice.dto.res.NotificationResponse;
 import dev.fnvir.kajz.notificationservice.model.enums.RecipientRole;
 import io.hypersistence.tsid.TSID;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -29,7 +29,7 @@ import reactor.core.publisher.Sinks;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class PushNotificationSseService {
 
     /**
@@ -89,10 +89,10 @@ public class PushNotificationSseService {
         Flux<ServerSentEvent<NotificationResponse>> flux = Flux.concat(replayFlux, holder.sink.asFlux())
                 .doOnSubscribe(_ -> {
                     holder.incrementSubscribers();
-                    log.info("New connection opened for userId: {}, role: {}", userId, role);
+                    log.debug("New connection opened for userId: {}, role: {}", userId, role);
                 }).doFinally(st -> {
                     holder.decrementSubscribers();
-                    log.info("SSE connection closed for userId={}, role:{}, cause={}", userId, role, st);
+                    log.debug("SSE connection closed for userId={}, role:{}, cause={}", userId, role, st);
                 });
 
         return flux;
