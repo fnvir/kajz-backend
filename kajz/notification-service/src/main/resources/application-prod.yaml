@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5434/notificationdb
+    username: postgres
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show_sql: false
+
+  flyway:
+    enabled: true
+
+sms:
+  twilio:
+    enabled: true
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: true
+      
+logging:
+  level:
+    '[dev.fnvir.kajz]': info
+    '[com.netflix.discovery]': warn
+    '[org.apache.kafka]': warn
