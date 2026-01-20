@@ -50,6 +50,16 @@ spring:
                 args:
                   key-resolver: "#{@ipKeyResolver}"
                   rate-limiter: "#{@redisRateLimiter}"
+          
+          - id: notification-service
+            uri: lb://NOTIFICATIONSERVICE
+            predicates:
+              - Path=/notifications/**, /notification-service/v3/api-docs
+            filters:
+              - name: RequestRateLimiter
+                args:
+                  key-resolver: "#{@ipKeyResolver}"
+                  rate-limiter: "#{@redisRateLimiter}"
 
 eureka:
   instance:
@@ -75,6 +85,8 @@ springdoc:
       url: /v3/api-docs
     - name: Auth Service
       url: /auth-service/v3/api-docs
+    - name: Notification Service
+      url: /notification-service/v3/api-docs
 
 
 server:
