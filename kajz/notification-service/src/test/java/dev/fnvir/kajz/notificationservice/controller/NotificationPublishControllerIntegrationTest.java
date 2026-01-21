@@ -68,7 +68,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept valid email notification request with ADMIN role")
         void shouldAcceptValidEmailNotificationRequestWithAdminRole() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidEmailRequest())
@@ -82,7 +82,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept valid email notification request with SYSTEM role")
         void shouldAcceptValidEmailNotificationRequestWithSystemRole() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidEmailRequest())
@@ -95,7 +95,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should reject email notification request without proper role")
         void shouldRejectEmailNotificationRequestWithoutProperRole() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidEmailRequest())
@@ -107,7 +107,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should reject unauthenticated email notification request")
         void shouldRejectUnauthenticatedEmailNotificationRequest() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidEmailRequest())
@@ -120,7 +120,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should return bad request for invalid email event")
         void shouldReturnBadRequestForInvalidEmailEvent() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -139,7 +139,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should return bad request for invalid email format")
         void shouldReturnBadRequestForInvalidEmailFormat() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -158,7 +158,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept email with CC and BCC")
         void shouldAcceptEmailWithCcAndBcc() {
             webTestClient.post()
-                    .uri("/notifications/email")
+                    .uri("/notifications/publish/email")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -191,7 +191,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept valid SMS notification request with ADMIN role")
         void shouldAcceptValidSmsNotificationRequestWithAdminRole() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidSmsRequest())
@@ -205,7 +205,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept valid SMS notification request with SYSTEM role")
         void shouldAcceptValidSmsNotificationRequestWithSystemRole() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidSmsRequest())
@@ -218,7 +218,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should reject SMS notification request without proper role")
         void shouldRejectSmsNotificationRequestWithoutProperRole() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidSmsRequest())
@@ -230,7 +230,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should reject unauthenticated SMS notification request")
         void shouldRejectUnauthenticatedSmsNotificationRequest() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidSmsRequest())
@@ -243,7 +243,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should return bad request for invalid phone number format")
         void shouldReturnBadRequestForInvalidPhoneNumberFormat() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -261,7 +261,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should return bad request for empty SMS message")
         void shouldReturnBadRequestForEmptySmsMessage() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -279,7 +279,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should return bad request for missing phone number")
         void shouldReturnBadRequestForMissingPhoneNumber() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -296,7 +296,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should return bad request for phone number without country code")
         void shouldReturnBadRequestForPhoneNumberWithoutCountryCode() {
             webTestClient.post()
-                    .uri("/notifications/sms")
+                    .uri("/notifications/publish/sms")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue("""
@@ -328,7 +328,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept valid push notification request with ADMIN role")
         void shouldAcceptValidPushNotificationRequestWithAdminRole() {
             webTestClient.post()
-                    .uri("/notifications/push")
+                    .uri("/notifications/publish/push")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidPushRequest())
@@ -342,7 +342,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should accept valid push notification request with SYSTEM role")
         void shouldAcceptValidPushNotificationRequestWithSystemRole() {
             webTestClient.post()
-                    .uri("/notifications/push")
+                    .uri("/notifications/publish/push")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidPushRequest())
@@ -355,7 +355,7 @@ class NotificationPublishControllerIntegrationTest {
         @DisplayName("Should reject push notification request for unauthorized role")
         void shouldRejectPushNotificationRequestForUserRole() {
             webTestClient.post()
-                    .uri("/notifications/push")
+                    .uri("/notifications/publish/push")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(createValidPushRequest())
@@ -376,7 +376,7 @@ class NotificationPublishControllerIntegrationTest {
                     """.formatted(UUID.randomUUID());
 
             webTestClient.post()
-                    .uri("/notifications/push")
+                    .uri("/notifications/publish/push")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(invalidRequest)
@@ -401,7 +401,7 @@ class NotificationPublishControllerIntegrationTest {
             event.setMetadata(largeMetadata);
 
             webTestClient.post()
-                    .uri("/notifications/push")
+                    .uri("/notifications/publish/push")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("X-API-Version", "1")
                     .bodyValue(event)
