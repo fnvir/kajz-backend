@@ -64,7 +64,7 @@ public class AuthService {
         context.setVariable("otpCode", otp);
         String emailContent = templateEngine.process("account-verification-email", context);
         
-        emailService.sendEmailAsync(userEmail, "Verify your account", emailContent, true);
+        emailService.sendEmail(userEmail, "Verify your account", emailContent, true);
     }
 
     public void initiatePasswordReset(@Valid ForgotPasswordReq req) {
@@ -77,7 +77,7 @@ public class AuthService {
         context.setVariable("otp", otp);
         String emailContent = templateEngine.process("password-reset-email", context);
         // send email
-        emailService.sendEmailAsync(req.email(), "Reset your password", emailContent, true);
+        emailService.sendEmail(req.email(), "Reset your password", emailContent, true);
     }
     
     public void resetPassword(@Valid ResetPasswordRequest req) {
