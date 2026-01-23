@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: StorageService
+  
+  threads:
+    virtual:
+      enabled: true
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://host.docker.internal:8444/realms/kajz
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/storagedb
+    username: postgres
+    password: root
+  
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+    show_sql: true
+
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+        
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+  
+  webflux:
+    apiversion:
+      default: 1
+      supported: 1
+      use:
+        header: X-API-Version
+  
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: false
+    fetch-registry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+      
+springdoc:
+  swagger-ui:
+    path: /storage-service/swagger-ui.html
+  api-docs:
+    path: /storage-service/v3/api-docs
+    
+server:
+  port: 8083
+  http2.enabled: true
+  
+management:
+  endpoint:
+    health:
+      access: read-only
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  
+logging:
+  level:
+    '[dev.fnvir.kajz]': debug
+    '[com.netflix.discovery]': warn
