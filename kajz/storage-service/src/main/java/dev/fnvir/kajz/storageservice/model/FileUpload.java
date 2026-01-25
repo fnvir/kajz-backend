@@ -21,9 +21,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "uploaded_files")
+@Table(name = "file_uploads")
 @Getter @Setter
-public class UploadedFile extends Auditable {
+public class FileUpload extends Auditable {
     
     @Id
     @Tsid
@@ -32,7 +32,7 @@ public class UploadedFile extends Auditable {
     private UUID ownerId;
     
     @Column(nullable = false)
-    private String filePath;
+    private String filename;
     
     private String mimeType;
     
@@ -49,6 +49,6 @@ public class UploadedFile extends Auditable {
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
     @Size(max = 5)
-    private Map<String, String> attributes = new HashMap<>();
+    private Map<String, String> metadata = new HashMap<>();
     
 }
