@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.hibernate.annotations.Type;
 
-import dev.fnvir.kajz.storageservice.model.enums.FileAccessLevel;
-import dev.fnvir.kajz.storageservice.model.enums.UploadStatus;
+import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
+import dev.fnvir.kajz.storageservice.enums.UploadStatus;
 import io.hypersistence.utils.hibernate.id.Tsid;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;

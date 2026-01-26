@@ -1,4 +1,4 @@
-package dev.fnvir.kajz.storageservice.model.enums;
+package dev.fnvir.kajz.storageservice.enums;
 
 public enum UploadStatus {
     UPLOADING,
