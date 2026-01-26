@@ -34,9 +34,11 @@ public class FileUpload extends Auditable {
     @Column(nullable = false)
     private String filename;
     
+    @Column(nullable = false)
     private String mimeType;
     
-    private Long size;
+    @Column(nullable = false)
+    private Long contentSize;
     
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
