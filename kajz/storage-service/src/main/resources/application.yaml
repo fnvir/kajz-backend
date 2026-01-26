@@ -47,6 +47,7 @@ spring:
         header: X-API-Version
 
 storage:
+  provider: azure-blob
 #  aws:
 #    s3: # set these through IDE environment variables
 #      access-key: ${AWS_ACCESS_KEY}
