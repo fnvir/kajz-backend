@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @Component
 @ConfigurationProperties("storage.aws.s3")
-public class AwsStorageProperties {
+public class AwsS3Properties {
     
     /**
      * AWS access key.
@@ -32,5 +32,11 @@ public class AwsStorageProperties {
      * The name of the S3 bucket.
      */
     private String bucketName;
+    
+    /**
+     * Whether to auto create the bucket if it doesn't exist.
+     * Default is false.
+     */
+    private Boolean autoCreateBucket = false;
 
 }

@@ -57,6 +57,7 @@ storage:
     blob:
       connection-string: ${AZURE_BLOB_CONNECTION_STRING}
       container-name: ${AZURE_BLOB_CONTAINER_NAME}
+      auto-create-container: false
 
 eureka:
   instance:

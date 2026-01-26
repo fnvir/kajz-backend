@@ -23,4 +23,10 @@ public class AzureBlobStorageProperties {
      */
     private String containerName;
     
+    /**
+     * Whether to auto create the container if it doesn't exist.
+     * Default is false.
+     */
+    private Boolean autoCreateContainer = false;
+    
 }
