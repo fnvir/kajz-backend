@@ -28,7 +28,7 @@ public class StorageService {
     public InitiateUploadResponse initiateUploadProcess(UUID uploaderId, @Valid InitiateUploadRequest req) {
         String fileExt = StringUtils.getFilenameExtension(req.filename());
         String filename = String.join("-",
-                req.purpose().strip().replaceAll("\\s+", "-").replaceAll("-+", "-").toLowerCase(),
+                req.purpose().replaceAll("[^a-zA-Z0-9_-]", "_").replaceAll("_+", "_").toLowerCase(),
                 TSID.fast().toLowerCase()
         );
         String filenameWithExt = filename + (fileExt == null ? "" : ("." + fileExt));
@@ -41,7 +41,6 @@ public class StorageService {
         file.setContentSize(req.fileSize());
         file.setStatus(UploadStatus.UPLOADING);
         file = storageRepository.saveAndFlush(file);
-        
         
         return storageProvider.initiateUpload(file);
     }
