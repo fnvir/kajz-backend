@@ -10,7 +10,7 @@ import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.util.UuidEncodeUtils;
 
-public abstract class StorageProvider {
+public abstract class AbstractStorageProvider {
     
     protected static final Duration UPLOAD_EXPIRY_TIME = Duration.ofMinutes(2);
     

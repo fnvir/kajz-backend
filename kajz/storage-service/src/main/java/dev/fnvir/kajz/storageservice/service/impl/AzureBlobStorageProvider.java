@@ -19,14 +19,14 @@ import com.azure.storage.common.sas.SasProtocol;
 import dev.fnvir.kajz.storageservice.config.AzureBlobStorageProperties;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
-import dev.fnvir.kajz.storageservice.service.StorageProvider;
+import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @ConditionalOnProperty(name = "storage.provider", havingValue = "azure-blob")
-public class AzureBlobStorageProvider extends StorageProvider {
+public class AzureBlobStorageProvider extends AbstractStorageProvider {
     
     private final AzureBlobStorageProperties blobProperties;
     private final BlobContainerClient blobContainerClient;

@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StorageService {
     
     private final StorageRepository storageRepository;
-    private final StorageProvider storageProvider;
+    private final AbstractStorageProvider storageProvider;
     
     @Transactional
     public InitiateUploadResponse initiateUploadProcess(UUID uploaderId, @Valid InitiateUploadRequest req) {

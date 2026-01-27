@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
-import dev.fnvir.kajz.storageservice.service.StorageProvider;
+import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @Slf4j
 @Service
 @ConditionalOnProperty(name = "storage.provider", havingValue = "aws-s3")
-public class S3StorageProvider extends StorageProvider {
+public class S3StorageProvider extends AbstractStorageProvider {
     
     private final AwsS3Properties s3Properties;
     private final S3Client s3Client;
@@ -36,8 +36,9 @@ public class S3StorageProvider extends StorageProvider {
     private final String bucketName;
     
     public S3StorageProvider(AwsS3Properties s3Properties) {
-        var credentialsProvider = StaticCredentialsProvider
-                .create(AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey()));
+        var credentialsProvider = StaticCredentialsProvider.create(
+            AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey())
+        );
         
         this.s3Client = S3Client.builder()
                 .region(Region.of(s3Properties.getRegion()))
