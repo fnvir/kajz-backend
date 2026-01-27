@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Size;
 
 @ValidFileUpload
 public record InitiateUploadRequest (
+        @Size(max = 500)
+        String filename,
+        
         @NotNull
         String mimeType,
         

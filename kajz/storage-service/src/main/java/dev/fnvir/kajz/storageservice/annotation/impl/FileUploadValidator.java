@@ -1,5 +1,6 @@
 package dev.fnvir.kajz.storageservice.annotation.impl;
 
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Component;
 
 import dev.fnvir.kajz.storageservice.annotation.ValidFileUpload;
@@ -34,6 +35,17 @@ public class FileUploadValidator implements ConstraintValidator<ValidFileUpload,
             .addPropertyNode("mimeType")
             .addConstraintViolation();
             valid = false;
+        }
+        
+        //Validate file name
+        var filenameMimeType = MediaTypeFactory.getMediaType(value.filename());
+        if (filenameMimeType.isPresent() && !filenameMimeType.get().toString().equals(value.mimeType())) {
+            context.buildConstraintViolationWithTemplate(
+                    "Media type of filename doesn't match the provided mimeType"
+                )
+                .addPropertyNode("filename")
+                .addConstraintViolation();
+                valid = false;
         }
 
         // Validate file size
