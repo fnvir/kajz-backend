@@ -18,6 +18,7 @@ import com.azure.storage.common.sas.SasProtocol;
 
 import dev.fnvir.kajz.storageservice.config.AzureBlobStorageProperties;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
 import jakarta.annotation.PostConstruct;
@@ -55,6 +56,11 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
                         + " Please create it first or enable auto-creation.");
             }
         }
+    }
+    
+    @Override
+    public StorageProviderType getProviderType() {
+        return StorageProviderType.AZURE_BLOB;
     }
     
     @Override

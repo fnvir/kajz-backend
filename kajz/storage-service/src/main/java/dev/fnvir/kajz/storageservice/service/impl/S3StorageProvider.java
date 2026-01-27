@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
 import jakarta.annotation.PostConstruct;
@@ -106,6 +107,11 @@ public class S3StorageProvider extends AbstractStorageProvider {
             log.error("Failed to create S3 bucket: {}", bucket, e);
             throw new RuntimeException("Failed to create S3 bucket", e);
         }
+    }
+    
+    @Override
+    public StorageProviderType getProviderType() {
+        return StorageProviderType.AWS_S3;
     }
 
     @Override

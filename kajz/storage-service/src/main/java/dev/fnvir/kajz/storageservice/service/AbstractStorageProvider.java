@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
+import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.util.UuidEncodeUtils;
 
@@ -24,4 +25,7 @@ public abstract class AbstractStorageProvider {
     }
     
     public abstract InitiateUploadResponse initiateUpload(FileUpload file);
+    
+    public abstract StorageProviderType getProviderType();
+    
 }
