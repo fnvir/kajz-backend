@@ -1,6 +1,6 @@
 package dev.fnvir.kajz.storageservice.service.impl;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -120,7 +120,10 @@ public class S3StorageProvider extends StorageProvider {
         return InitiateUploadResponse.builder()
                 .fileId(file.getId())
                 .uploadUrl(presignedReq.url().toString())
-                .uploadHeaders(new HashMap<>(presignedReq.signedHeaders()))
+                .uploadHeaders(Map.of(
+                        "Content-Type", file.getMimeType(),
+                        "Content-Length", file.getContentSize()
+                ))
                 .expiresAt(presignedReq.expiration())
                 .build();
     }
