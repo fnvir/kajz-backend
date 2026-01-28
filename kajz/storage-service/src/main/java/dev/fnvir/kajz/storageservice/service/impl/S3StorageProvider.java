@@ -1,11 +1,14 @@
 package dev.fnvir.kajz.storageservice.service.impl;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
+import dev.fnvir.kajz.storageservice.config.StorageProperties;
+import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
@@ -15,11 +18,17 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -36,7 +45,9 @@ public class S3StorageProvider extends AbstractStorageProvider {
     private final S3Presigner s3Presigner;
     private final String bucketName;
     
-    public S3StorageProvider(AwsS3Properties s3Properties) {
+    public S3StorageProvider(StorageProperties storageProps, AwsS3Properties s3Properties) {
+        super(storageProps);
+        
         var credentialsProvider = StaticCredentialsProvider.create(
             AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey())
         );
@@ -151,4 +162,46 @@ public class S3StorageProvider extends AbstractStorageProvider {
         return s3Presigner.presignPutObject(presignReq);
     }
 
+    @Override
+    public UploadValidationResultDTO validateUploadCompletion(FileUpload file) {
+        String storageKey = generateStorageKey(file.getFilename(), file.getAccess(), file.getOwnerId());
+
+        var headReq = HeadObjectRequest.builder()
+                .bucket(bucketName)
+                .key(storageKey)
+                .build();
+        try {
+            // verify uploaded file exists
+            HeadObjectResponse headRes = s3Client.headObject(headReq);
+            
+            // validate uploaded file's size
+            boolean isValidFileSize = super.validateFileSize(headRes.contentLength());
+            if(!isValidFileSize) {
+                return UploadValidationResultDTO.invalidContentLength();
+            }
+        } catch (NoSuchKeyException e) {
+            return UploadValidationResultDTO.fileDoesntExist();
+        } catch (S3Exception e) {
+            log.error("Failed to read object from S3 with: {}", storageKey);
+            throw new RuntimeException(e);
+        }
+        
+        // validate content-type
+        var getReq = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(storageKey)
+                .range("bytes=0-8191") // first 8KB only
+                .build();
+        
+        try (ResponseInputStream<GetObjectResponse> in = s3Client.getObject(getReq)) {
+            boolean isValidMediaType = super.validateContentType(file.getFilename(), in);
+            if(!isValidMediaType) {
+                return UploadValidationResultDTO.invalidContentType();
+            }
+        } catch (IOException e) {
+            log.error("Skipping content-type validation: IO error in input stream of s3 object. {}", e.getMessage());
+        }
+        return UploadValidationResultDTO.success();
+    }
+    
 }

@@ -1,5 +1,6 @@
 package dev.fnvir.kajz.storageservice.model;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -52,5 +53,10 @@ public class FileUpload extends Auditable {
     @Column(columnDefinition = "jsonb")
     @Size(max = 5)
     private Map<String, String> metadata = new HashMap<>();
+    
+    /**
+     * The timestamp at which this upload was completed.
+     */
+    private Instant completedAt;
     
 }
