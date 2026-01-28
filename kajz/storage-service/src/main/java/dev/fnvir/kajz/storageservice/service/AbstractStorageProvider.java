@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.time.Duration;
 
 import org.apache.tika.Tika;
+import org.springframework.scheduling.annotation.Async;
 
 import dev.fnvir.kajz.storageservice.config.StorageProperties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
@@ -95,4 +96,15 @@ public abstract class AbstractStorageProvider {
      * @return true if it was deleted successfully, else false (if it doesn't exist).
      */
     public abstract boolean deleteFile(String key);
+    
+    /**
+     * Asynchronously delete a file from the storage provider.
+     * This is the same as {@link #deleteFile(String)} but executes asynchronously.
+     * 
+     * @param key the object-key (S3) / blob-name (Azure Blob) to delete.
+     */
+    @Async
+    public void deleteFileAsync(String key) {
+        deleteFile(key);
+    }
 }

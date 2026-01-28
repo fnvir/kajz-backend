@@ -76,7 +76,10 @@ public class StorageService {
         if (!validationResult.isSuccess()) {
             switch (validationResult.getFailureReason()) {
                 case FILE_DOESNT_EXIST -> throw new NotFoundException(validationResult.getMessage());
-                default -> throw new ConflictException(validationResult.getMessage());
+                default -> {
+                    storageProvider.deleteFileAsync(file.getStoragePath());
+                    throw new ConflictException(validationResult.getMessage());
+                }
             }
         }
         
