@@ -1,6 +1,7 @@
 package dev.fnvir.kajz.storageservice.service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
@@ -37,13 +38,7 @@ public class StorageService {
     
     @Transactional
     public InitiateUploadResponse initiateUploadProcess(UUID uploaderId, @Valid InitiateUploadRequest req) {
-        String fileExt = StringUtils.getFilenameExtension(req.filename());
-        String filename = String.join("-",
-                req.purpose().replaceAll("[^a-zA-Z0-9_-]", "_").replaceAll("_+", "_").toLowerCase(),
-                TSID.fast().toLowerCase()
-        );
-        String filenameWithExt = filename + (fileExt == null ? "" : ("." + fileExt));
-        
+        String filenameWithExt = generateFilenameWithExt(req.filename(), req.purpose());
         String storagePath = generateStoragePath(filenameWithExt, req.accessLevel(), uploaderId);
         
         FileUpload file = new FileUpload();
@@ -57,6 +52,17 @@ public class StorageService {
         file = storageRepository.saveAndFlush(file);
         
         return storageProvider.initiateUpload(file);
+    }
+    
+    private String generateFilenameWithExt(String originalFilename, String purpose) {
+        String uploadIntent = purpose != null ? purpose : "upload";
+        String fileExt = Optional.ofNullable(StringUtils.getFilenameExtension(originalFilename))
+                .orElse("bin"); // default to ".bin" format
+        String newName = String.join("-",
+                uploadIntent.replaceAll("[^a-zA-Z0-9_-]", "_").replaceAll("_+", "_").toLowerCase(),
+                TSID.fast().toLowerCase()
+        );
+        return newName + "." + fileExt;
     }
     
     private String generateStoragePath(String filename, FileAccessLevel accessLevel, @Nullable UUID ownerId) {
