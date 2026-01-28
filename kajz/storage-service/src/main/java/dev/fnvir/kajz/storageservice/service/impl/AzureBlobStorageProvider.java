@@ -74,7 +74,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
     
     @Override
     public InitiateUploadResponse initiateUpload(FileUpload file) {
-        String blobName = super.generateStorageKey(file.getFilename(), file.getAccess(), file.getOwnerId());
+        String blobName = file.getStoragePath();
         
         Instant sasExpiresAt = Instant.now().plus(UPLOAD_EXPIRY_TIME);
         
@@ -118,7 +118,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
 
     @Override
     public UploadValidationResultDTO validateUploadCompletion(FileUpload file) {
-        String blobName = generateStorageKey(file.getFilename(), file.getAccess(), file.getOwnerId());
+        String blobName = file.getStoragePath();
         BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
         
         // verify file exists

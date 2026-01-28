@@ -127,10 +127,10 @@ public class S3StorageProvider extends AbstractStorageProvider {
 
     @Override
     public InitiateUploadResponse initiateUpload(FileUpload file) {
-        String objectName = generateStorageKey(file.getFilename(), file.getAccess(), file.getOwnerId());
+        String objectKey = file.getStoragePath();
         
         PresignedPutObjectRequest presignedReq = generatePresignedUploadUrl(
-                objectName,
+                objectKey,
                 file.getMimeType(),
                 file.getContentSize()
         );
@@ -164,7 +164,7 @@ public class S3StorageProvider extends AbstractStorageProvider {
 
     @Override
     public UploadValidationResultDTO validateUploadCompletion(FileUpload file) {
-        String storageKey = generateStorageKey(file.getFilename(), file.getAccess(), file.getOwnerId());
+        String storageKey = file.getStoragePath();
 
         var headReq = HeadObjectRequest.builder()
                 .bucket(bucketName)

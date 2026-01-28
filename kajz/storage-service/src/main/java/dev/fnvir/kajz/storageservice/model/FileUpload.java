@@ -35,6 +35,12 @@ public class FileUpload extends Auditable {
     @Column(nullable = false)
     private String filename;
     
+    /**
+     * The path where the file is stored in the storage provider.
+     */
+    @Column(nullable = false)
+    private String storagePath;
+    
     @Column(nullable = false)
     private String mimeType;
     

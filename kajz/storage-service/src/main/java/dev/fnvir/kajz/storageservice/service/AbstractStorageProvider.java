@@ -3,18 +3,14 @@ package dev.fnvir.kajz.storageservice.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
-import java.util.UUID;
 
 import org.apache.tika.Tika;
-import org.jspecify.annotations.Nullable;
 
 import dev.fnvir.kajz.storageservice.config.StorageProperties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
-import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
-import dev.fnvir.kajz.storageservice.util.UuidEncodeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,15 +23,6 @@ public abstract class AbstractStorageProvider {
     protected static final Duration UPLOAD_EXPIRY_TIME = Duration.ofMinutes(2);
     
     private final Tika tika = new Tika();
-    
-    protected String generateStorageKey(String filename, FileAccessLevel accessLevel, @Nullable UUID ownerId) {
-        String subfolder = ownerId == null ? "common" : UuidEncodeUtils.encodeCrockford(ownerId);
-        return String.join("/",
-                    accessLevel == FileAccessLevel.PRIVATE ? "private" : "public",
-                    subfolder,
-                    filename
-                ).strip();
-    }
     
     public abstract InitiateUploadResponse initiateUpload(FileUpload file);
     
