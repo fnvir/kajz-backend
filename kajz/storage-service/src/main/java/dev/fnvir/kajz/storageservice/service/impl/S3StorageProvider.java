@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
-import dev.fnvir.kajz.storageservice.config.StorageProperties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
+import dev.fnvir.kajz.storageservice.util.StorageFileValidatorUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +42,13 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @ConditionalOnProperty(name = "storage.provider", havingValue = "aws-s3")
 public class S3StorageProvider extends AbstractStorageProvider {
     
+    private final StorageFileValidatorUtils fileValidatorUtils;
     private final AwsS3Properties s3Properties;
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final String bucketName;
     
-    public S3StorageProvider(StorageProperties storageProps, AwsS3Properties s3Properties) {
-        super(storageProps);
-        
+    public S3StorageProvider(AwsS3Properties s3Properties, StorageFileValidatorUtils fileValidatorUtils) {
         var credentialsProvider = StaticCredentialsProvider.create(
             AwsBasicCredentials.create(s3Properties.getAccessKey(), s3Properties.getSecretKey())
         );
@@ -67,6 +66,8 @@ public class S3StorageProvider extends AbstractStorageProvider {
         this.bucketName = s3Properties.getBucketName();
         
         this.s3Properties = s3Properties;
+        
+        this.fileValidatorUtils = fileValidatorUtils;
     }
     
     @PostConstruct
@@ -177,7 +178,7 @@ public class S3StorageProvider extends AbstractStorageProvider {
             HeadObjectResponse headRes = s3Client.headObject(headReq);
             
             // validate uploaded file's size
-            boolean isValidFileSize = super.validateFileSize(headRes.contentLength());
+            boolean isValidFileSize = fileValidatorUtils.isValidFileSize(headRes.contentLength());
             if(!isValidFileSize) {
                 return UploadValidationResultDTO.invalidContentLength();
             }
@@ -196,7 +197,7 @@ public class S3StorageProvider extends AbstractStorageProvider {
                 .build();
         
         try (ResponseInputStream<GetObjectResponse> in = s3Client.getObject(getReq)) {
-            boolean isValidMediaType = super.validateContentType(file.getFilename(), in);
+            boolean isValidMediaType = fileValidatorUtils.isValidMimeType(file.getFilename(), in);
             if(!isValidMediaType) {
                 return UploadValidationResultDTO.invalidContentType();
             }

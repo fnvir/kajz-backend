@@ -4,19 +4,17 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Component;
 
 import dev.fnvir.kajz.storageservice.annotation.ValidFileUpload;
-import dev.fnvir.kajz.storageservice.config.StorageProperties;
 import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
+import dev.fnvir.kajz.storageservice.util.StorageFileValidatorUtils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class FileUploadValidator implements ConstraintValidator<ValidFileUpload, InitiateUploadRequest> {
 
-    private final StorageProperties storageProperties;
-
-    public FileUploadValidator(StorageProperties storageProperties) {
-        this.storageProperties = storageProperties;
-    }
+    private final StorageFileValidatorUtils fileValidator;
 
     @Override
     public boolean isValid(InitiateUploadRequest value, ConstraintValidatorContext context) {
@@ -28,7 +26,7 @@ public class FileUploadValidator implements ConstraintValidator<ValidFileUpload,
         context.disableDefaultConstraintViolation();
 
         // Validate mime type
-        if (!storageProperties.getAllowedTypes().contains(value.mimeType())) {
+        if (!fileValidator.isValidMimeType(value.mimeType())) {
             context.buildConstraintViolationWithTemplate(
                 "Unsupported file type: " + value.mimeType()
             )
@@ -49,7 +47,7 @@ public class FileUploadValidator implements ConstraintValidator<ValidFileUpload,
         }
 
         // Validate file size
-        if (value.fileSize() > storageProperties.getMaxSize()) {
+        if (!fileValidator.isValidFileSize(value.fileSize())) {
             context.buildConstraintViolationWithTemplate(
                 "File size exceeds maximum allowed size"
             ).addPropertyNode("fileSize")

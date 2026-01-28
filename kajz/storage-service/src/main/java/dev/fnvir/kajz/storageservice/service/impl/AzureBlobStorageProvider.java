@@ -22,12 +22,12 @@ import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.sas.SasProtocol;
 
 import dev.fnvir.kajz.storageservice.config.AzureBlobStorageProperties;
-import dev.fnvir.kajz.storageservice.config.StorageProperties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
+import dev.fnvir.kajz.storageservice.util.StorageFileValidatorUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,16 +36,17 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "storage.provider", havingValue = "azure-blob")
 public class AzureBlobStorageProvider extends AbstractStorageProvider {
     
+    private final StorageFileValidatorUtils fileValidatorUtils;
+    
     private final AzureBlobStorageProperties blobProperties;
     private final BlobContainerClient blobContainerClient;
     
     private static final boolean FORCE_HTTPS_ON_SAS = true; // make this configurable later
     
     public AzureBlobStorageProvider(
-            StorageProperties storageProps,
-            AzureBlobStorageProperties blobProperties
+            AzureBlobStorageProperties blobProperties,
+            StorageFileValidatorUtils fileValidatorUtils
     ) {
-        super(storageProps);
         
         BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(blobProperties.getConnectionString())
@@ -53,6 +54,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         
         this.blobContainerClient = blobServiceClient.getBlobContainerClient(blobProperties.getContainerName());
         this.blobProperties = blobProperties;
+        this.fileValidatorUtils = fileValidatorUtils;
     }
     
     @PostConstruct
@@ -130,7 +132,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         
         // validate uploaded file's content-length
         long filesize = properties.getBlobSize();
-        boolean isValidBlobSize = super.validateFileSize(filesize);
+        boolean isValidBlobSize = fileValidatorUtils.isValidFileSize(filesize);
         if (!isValidBlobSize) {
             return UploadValidationResultDTO.invalidContentLength();
         }
@@ -138,7 +140,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         // validate uploaded file's actual content-type
         // TODO: validate actual content-type in background worker asynchronously
         try (InputStream in = blobClient.openInputStream(new BlobRange(0, 8192L), null)) { // read first 8KB only
-            boolean isValidMediaType = super.validateContentType(file.getFilename(), in);
+            boolean isValidMediaType = fileValidatorUtils.isValidMimeType(file.getFilename(), in);
             if(!isValidMediaType) {
                 return UploadValidationResultDTO.invalidContentType();
             }
