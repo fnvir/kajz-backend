@@ -12,6 +12,8 @@ import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.repository.StorageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.core.LockAssert;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
 @Slf4j
 @Service
@@ -21,9 +23,12 @@ public class StorageCleanupService {
     private final StorageRepository storageRepository;
     private final AbstractStorageProvider storageProvider;
     
-    @Scheduled(initialDelay = 2, fixedRate = 10, timeUnit = TimeUnit.MINUTES)
     @Transactional
+    @Scheduled(initialDelay = 2, fixedRate = 10, timeUnit = TimeUnit.MINUTES)
+    @SchedulerLock(name = "cleanupInvalidUploads", lockAtMostFor = "9m")
     protected void cleanupInvalidUploads() {
+        LockAssert.assertLocked();
+        
         List<FileUpload> uploads = storageRepository.findInvalidUploadsPendingSince(Duration.ofMinutes(5), 99);
         for (var f : uploads) {
             if (f.getStoragePath() != null && !f.isDeleted())

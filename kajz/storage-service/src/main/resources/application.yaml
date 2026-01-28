@@ -11,6 +11,15 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://host.docker.internal:8444/realms/kajz
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis1234
+    web:
+      pageable:
+        max-page-size: 100
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -30,11 +39,6 @@ spring:
     enabled: false
     baseline-on-migrate: true
     
-  data:
-    web:
-      pageable:
-        max-page-size: 100
-        
   jackson:
     mapper:
       accept-case-insensitive-enums: true
