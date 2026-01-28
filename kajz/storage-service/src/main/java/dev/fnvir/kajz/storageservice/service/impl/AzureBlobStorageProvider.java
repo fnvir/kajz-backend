@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -147,6 +148,15 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         }
         return UploadValidationResultDTO.success();
         
+    }
+
+    @Override
+    public boolean deleteFile(String key) {
+        if (!StringUtils.hasText(key)) {
+            return false;
+        }
+        BlobClient blobClient = blobContainerClient.getBlobClient(key);
+        return blobClient.deleteIfExists();
     }
 
 }

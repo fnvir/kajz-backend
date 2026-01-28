@@ -75,4 +75,24 @@ public abstract class AbstractStorageProvider {
             return "application/octet-stream";
         }
     }
+    
+    /**
+     * Delete the uploaded file from the storage provider.
+     * 
+     * @param file the file upload entity.
+     * @return true if deletion was successful, false otherwise.
+     */
+    public boolean deleteUploadedFile(FileUpload file) {
+        if(file.getCompletedAt() == null)
+            return false;
+        return deleteFile(file.getStoragePath());
+    }
+
+    /**
+     * Delete a file from the storage provider (if it exists).
+     * 
+     * @param key the object-key (S3) / blob-name (Azure Blob) of the file to delete.
+     * @return true if it was deleted successfully, else false (if it doesn't exist).
+     */
+    public abstract boolean deleteFile(String key);
 }

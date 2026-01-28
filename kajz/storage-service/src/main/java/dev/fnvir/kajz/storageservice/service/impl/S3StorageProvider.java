@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
 import dev.fnvir.kajz.storageservice.config.StorageProperties;
@@ -22,6 +23,7 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
@@ -202,6 +204,24 @@ public class S3StorageProvider extends AbstractStorageProvider {
             log.error("Skipping content-type validation: IO error in input stream of s3 object. {}", e.getMessage());
         }
         return UploadValidationResultDTO.success();
+    }
+
+    @Override
+    public boolean deleteFile(String key) {
+        if (!StringUtils.hasText(key)) {
+            return false;
+        }
+        var deleteRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        try {
+            s3Client.deleteObject(deleteRequest);
+        } catch (S3Exception e) {
+            return false;
+        }
+        
+        return true;
     }
     
 }
