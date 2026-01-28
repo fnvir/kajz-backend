@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 
 import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
@@ -64,5 +65,9 @@ public class FileUpload extends Auditable {
      * The timestamp at which this upload was completed.
      */
     private Instant completedAt;
+    
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    private boolean deleted = false;
     
 }
