@@ -5,7 +5,7 @@ spring:
   threads:
     virtual:
       enabled: true
-  
+    
   security:
     oauth2:
       resourceserver:
@@ -42,8 +42,10 @@ spring:
   jackson:
     mapper:
       accept-case-insensitive-enums: true
-  
+
   webflux:
+    multipart:
+      max-disk-usage-per-part: 5MB
     apiversion:
       default: 1
       supported: 1
@@ -51,13 +53,13 @@ spring:
         header: X-API-Version
 
 storage:
-  provider: azure-blob
-#  aws:
-#    s3: # set these through IDE environment variables
-#      access-key: ${AWS_ACCESS_KEY}
-#      secret-key: ${AWS_SECRET_KEY}
-#      region: ${AWS_REGION}
-#      bucket-name: ${AWS_BUCKET_NAME}
+  provider: aws-s3
+  aws:
+    s3: # set these through IDE environment variables
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+      region: ${AWS_REGION}
+      bucket-name: ${AWS_BUCKET_NAME}
   azure:
     blob:
       connection-string: ${AZURE_BLOB_CONNECTION_STRING}
@@ -68,7 +70,7 @@ eureka:
   instance:
     prefer-ip-address: true
   client:
-    enabled: false
+    enabled: true
     fetch-registry: true
     register-with-eureka: true
     serviceUrl:
