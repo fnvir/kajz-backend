@@ -12,6 +12,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Internal DTO for storing information for file streaming.
+ */
 @Data
 @Builder
 @AllArgsConstructor

@@ -32,6 +32,9 @@ public class FileUpload extends Auditable {
     @Tsid
     private Long id;
     
+    /** 
+     * The ID of the owner of the file.
+     */
     private UUID ownerId;
     
     @Column(nullable = false)
@@ -43,22 +46,40 @@ public class FileUpload extends Auditable {
     @Column(nullable = false)
     private String storagePath;
     
+    /**
+     * The MIME type of the file.
+     */
     @Column(nullable = false)
     private String mimeType;
     
+    /**
+     * The size of the file in bytes.
+     */
     @Column(nullable = false)
     private Long contentSize;
     
+    /**
+     * The ETag of the uploaded file.
+     */
     private String eTag;
     
+    /**
+     * The access level of the file.
+     */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private FileAccessLevel access;
     
+    /**
+     * The status of the upload.
+     */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UploadStatus status;
     
+    /**
+     * Additional metadata associated with the file upload.
+     */
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
     @Size(max = 5)
@@ -69,6 +90,9 @@ public class FileUpload extends Auditable {
      */
     private Instant completedAt;
     
+    /**
+     * Whether the file has been marked as deleted.
+     */
     @Column(nullable = false)
     @ColumnDefault("false")
     private boolean deleted = false;

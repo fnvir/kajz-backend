@@ -1,5 +1,8 @@
 package dev.fnvir.kajz.storageservice.enums;
 
+/**
+ * Enum representing different levels of file access.
+ */
 public enum FileAccessLevel {
     /** Anyone can access. */
     PUBLIC,

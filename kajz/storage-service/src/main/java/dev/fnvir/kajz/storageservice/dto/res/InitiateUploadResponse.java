@@ -10,6 +10,11 @@ import lombok.Builder;
 
 /**
  * Response containing presigned upload URL and metadata.
+ * 
+ * @param fileId        the ID of the file to be uploaded
+ * @param uploadUrl     the pre-signed URL for uploading the file
+ * @param expiresAt     the expiration timestamp of the upload URL
+ * @param uploadHeaders additional headers to be sent when using the upload URL
  */
 @Builder
 public record InitiateUploadResponse (

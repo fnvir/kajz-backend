@@ -24,8 +24,12 @@ import dev.fnvir.kajz.storageservice.dto.StreamFileDto;
 import dev.fnvir.kajz.storageservice.dto.req.CompleteUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.ErrorResponse;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.service.StorageService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -38,6 +42,13 @@ public class StorageController {
     
     private final StorageService storageService;
     
+    /**
+     * Initiate an upload process by generating a pre-signed URL for uploading.
+     * 
+     * @param req            the initiate upload request payload
+     * @param authentication the authentication object
+     * @return response containing the pre-signed URL and upload details
+     */
     @PostMapping("/initiate-upload")
     public ResponseEntity<InitiateUploadResponse> initiateUpload(
             @RequestBody @Valid InitiateUploadRequest req,
@@ -47,6 +58,13 @@ public class StorageController {
         return ResponseEntity.ok(storageService.initiateUploadProcess(userId, req));
     }
     
+    /**
+     * Complete an upload by verifying and validating the uploaded file.
+     * 
+     * @param req            the complete upload request
+     * @param authentication the authentication object
+     * @return response containing the upload completion result
+     */
     @PostMapping("/complete-upload")
     public CompleteUploadResponse completeUpload(
             @RequestBody @Valid CompleteUploadRequest req,
@@ -59,21 +77,30 @@ public class StorageController {
     /**
      * Serve a file by its ID.
      * 
+     * <p>
+     * NOTE: This endpoint is only to be used if a CDN has not been set up yet, and
+     * public access to blobs are disabled.
+     * </p>
+     * 
      * <ul>
-     * <li>If the file access is public, no authentication is required.</li>
-     * <li>If the file access is protected, the user must be authenticated.</li>
-     * <li>If the file access is private, the user must be authenticated and must be
-     * the owner of the file.</li>
+     *   <li>If the file access is public, no authentication is required.</li>
+     *   <li>If the file access is protected, the user must be authenticated.</li>
+     *   <li>If the file access is private, the user must be authenticated and must be
+     *       the owner of the file.</li>
+     *   <li>User's with ADMIN role can access all files.</li>
      * </ul>
      * 
      * @param fileId      the ID of the file to serve.
      * @param ifNoneMatch the ETag from the client for cache validation.
      * @param response    the server HTTP response to write to.
-     * @return 200 OK with file stream, 401 Unauthorized, 403 Forbidden, 304 Not
-     *         Modified, or 404 Not Found.
+     * @return the file stream.
      */
-    @SecurityRequirements
     @GetMapping(path = "/download/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @SecurityRequirements
+    @ApiResponse(responseCode = "200", description = "A stream of the file", content = @Content)
+    @ApiResponse(responseCode = "401", description = "Unauthorized (for protected/private files)", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden (for private files)", content = @Content)
+    @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public ResponseEntity<StreamingResponseBody> serveFileValidatingAccess(
             @PathVariable Long fileId,
             @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch,
@@ -100,5 +127,7 @@ public class StorageController {
                 .eTag(result.getEtag())
                 .body(result.streamFile());
     }
+    
+    
     
 }
