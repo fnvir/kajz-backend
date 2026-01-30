@@ -1,7 +1,9 @@
 package dev.fnvir.kajz.storageservice.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
+import dev.fnvir.kajz.storageservice.exception.NotFoundException;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
 import dev.fnvir.kajz.storageservice.util.StorageFileValidatorUtils;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
@@ -230,4 +234,16 @@ public class S3StorageProvider extends AbstractStorageProvider {
         return true;
     }
 
+    @Override
+    public Callable<InputStream> downloadFile(String key) {
+        if (!StringUtils.hasText(key)) {
+            throw new NotFoundException("File not found");
+        }
+        GetObjectRequest getReq = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        return () -> s3Client.getObject(getReq, ResponseTransformer.toInputStream());
+    }
+    
 }

@@ -38,6 +38,8 @@ public class SecurityConfig {
                     .permitAll()
                     .pathMatchers("/actuator/**", "/error")
                     .permitAll()
+                    .pathMatchers(HttpMethod.GET, "/storage/public/**")
+                    .permitAll()
                     .anyExchange()
                     .authenticated()
             )

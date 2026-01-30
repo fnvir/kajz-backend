@@ -73,4 +73,20 @@ public class FileUpload extends Auditable {
     @ColumnDefault("false")
     private boolean deleted = false;
     
+    /**
+     * Check whether the file is available for use. It is considered
+     * active/available when:
+     * <ul>
+     *   <li>The file isn't marked as deleted.</li>
+     *   <li>The uploading has been completed (completedAt != null).</li>
+     *   <li>The file has been validated.</li>
+     * </ul>
+     * 
+     * @return true if the file is available to serve, else false.
+     */
+    @Transient
+    public boolean isAvailable() {
+        return !deleted && completedAt != null && status == UploadStatus.VALIDATED;
+    }
+    
 }

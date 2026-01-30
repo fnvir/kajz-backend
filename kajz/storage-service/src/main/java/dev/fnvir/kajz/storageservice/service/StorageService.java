@@ -5,10 +5,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ETag;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
+import dev.fnvir.kajz.storageservice.dto.StreamFileDto;
 import dev.fnvir.kajz.storageservice.dto.req.CompleteUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
@@ -35,6 +40,16 @@ public class StorageService {
     private final StorageRepository storageRepository;
     private final AbstractStorageProvider storageProvider;
     private final FileUploadMapper fileUploadMapper;
+    
+    private TransactionTemplate readOnlyTransaction;
+    
+    @Autowired
+    protected void setTransaction(PlatformTransactionManager transactionManager) {
+        TransactionTemplate tpl = new TransactionTemplate(transactionManager);
+        tpl.setReadOnly(true);
+        this.readOnlyTransaction = tpl;
+    }
+    
     
     @Transactional
     public InitiateUploadResponse initiateUploadProcess(UUID uploaderId, @Valid InitiateUploadRequest req) {
@@ -109,4 +124,34 @@ public class StorageService {
         return file;
     }
     
+    public StreamFileDto downloadPublicFile(Long fileId, String eTag) {
+        var fileRecord = readOnlyTransaction.execute(_ ->
+                storageRepository.findById(fileId).orElseThrow(NotFoundException::new)
+        );
+        
+        if (!fileRecord.isAvailable()) {
+            throw new NotFoundException("File isn't active.");
+        }
+        
+        if(fileRecord.getAccess() != FileAccessLevel.PUBLIC)
+            throw new ForbiddenException("File isn't public!");
+        
+        if (fileRecord.getETag() != null && eTag != null
+                && ETag.quoteETagIfNecessary(fileRecord.getETag()).equals(ETag.quoteETagIfNecessary(eTag))
+        ) {
+            return StreamFileDto.builder().etag(eTag.toString()).build();
+        }
+        
+        String storagePath = fileRecord.getStoragePath();
+        
+        return StreamFileDto.builder()
+                .filename(fileRecord.getFilename())
+                .contentLength(fileRecord.getContentSize())
+                .contentType(fileRecord.getMimeType())
+                .etag(fileRecord.getETag())
+                .inputStreamProvider(storageProvider.downloadFile(storagePath))
+                .build();
+        
+    }
+
 }

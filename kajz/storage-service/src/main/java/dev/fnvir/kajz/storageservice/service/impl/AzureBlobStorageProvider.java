@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import dev.fnvir.kajz.storageservice.config.AzureBlobStorageProperties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
+import dev.fnvir.kajz.storageservice.exception.NotFoundException;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.service.AbstractStorageProvider;
 import dev.fnvir.kajz.storageservice.util.StorageFileValidatorUtils;
@@ -162,5 +164,23 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         BlobClient blobClient = blobContainerClient.getBlobClient(key);
         return blobClient.deleteIfExists();
     }
+
+    @Override
+    public Callable<InputStream> downloadFile(String key) {
+        final String blobName = key;
+        
+        if (!StringUtils.hasText(blobName)) {
+            throw new NotFoundException("File not found");
+        }
+        
+        BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
+        if (!blobClient.exists()) {
+            throw new NotFoundException("File doesn't exist");
+        }
+        
+        return blobClient::openInputStream;
+    }
+    
+    
 
 }

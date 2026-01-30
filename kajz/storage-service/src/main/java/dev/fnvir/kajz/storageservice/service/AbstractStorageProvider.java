@@ -1,6 +1,8 @@
 package dev.fnvir.kajz.storageservice.service;
 
+import java.io.InputStream;
 import java.time.Duration;
+import java.util.concurrent.Callable;
 
 import org.springframework.scheduling.annotation.Async;
 
@@ -54,4 +56,13 @@ public abstract class AbstractStorageProvider {
     public void deleteFileAsync(String key) {
         deleteFile(key);
     }
+    
+    /**
+     * Stream a file from the storage provider. This is useful if there isn't direct
+     * public access to the file or no CDN has been set up yet.
+     * 
+     * @param key the object-key (S3) / blob-name (Azure Blob) to delete.
+     * @return a Callable that provides an InputStream to read the file.
+     */
+    public abstract Callable<InputStream> downloadFile(String key);
 }
