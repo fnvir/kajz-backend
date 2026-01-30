@@ -38,7 +38,7 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/actuator/**", "/error")
                     .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/storage/download/**")
+                    .requestMatchers(HttpMethod.GET, "/storage/files/{fileId}")
                     .permitAll()
                     .anyRequest()
                     .authenticated()

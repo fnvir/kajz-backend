@@ -95,7 +95,7 @@ public class StorageController {
      * @param response    the server HTTP response to write to.
      * @return the file stream.
      */
-    @GetMapping(path = "/download/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(path = "/files/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @SecurityRequirements
     @ApiResponse(responseCode = "200", description = "A stream of the file", content = @Content)
     @ApiResponse(responseCode = "401", description = "Unauthorized (for protected/private files)", content = @Content)
@@ -146,4 +146,5 @@ public class StorageController {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(storageService.generateTempDownloadUrl(fileId, userId));
     }
+    
 }
