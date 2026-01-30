@@ -2,7 +2,6 @@ package dev.fnvir.kajz.storageservice.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -145,10 +144,6 @@ public class S3StorageProvider extends AbstractStorageProvider {
         return InitiateUploadResponse.builder()
                 .fileId(file.getId())
                 .uploadUrl(presignedReq.url().toString())
-                .uploadHeaders(Map.of(
-                        "Content-Type", file.getMimeType(),
-                        "Content-Length", file.getContentSize()
-                ))
                 .expiresAt(presignedReq.expiration())
                 .build();
     }

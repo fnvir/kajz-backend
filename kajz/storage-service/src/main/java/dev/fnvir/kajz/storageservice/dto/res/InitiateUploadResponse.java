@@ -18,4 +18,8 @@ public record InitiateUploadResponse (
         String uploadUrl,
         Instant expiresAt,
         Map<String, Object> uploadHeaders
-) {}
+) {
+    public InitiateUploadResponse {
+        uploadHeaders = uploadHeaders != null ? uploadHeaders : Map.of();
+    }
+}

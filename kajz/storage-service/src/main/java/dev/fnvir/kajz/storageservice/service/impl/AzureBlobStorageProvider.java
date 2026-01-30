@@ -89,9 +89,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
                 .fileId(file.getId())
                 .uploadUrl(uploadSasUrl)
                 .uploadHeaders(Map.of(
-                    "x-ms-blob-type", "BlockBlob",
-                    "Content-Type", file.getMimeType(),
-                    "Content-Length", file.getContentSize()
+                    "x-ms-blob-type", "BlockBlob"
                 ))
                 .expiresAt(sasExpiresAt)
                 .build();
