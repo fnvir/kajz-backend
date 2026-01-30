@@ -78,6 +78,10 @@ public class StorageService {
     public CompleteUploadResponse verifyAndCompleteUpload(UUID userId, @Valid CompleteUploadRequest req) {
         var file = findByIdAndVerifyOwnershipOrThrow(req.fileId(), userId);
         
+        if(file.getStatus() != UploadStatus.UPLOADING || file.getCompletedAt() != null) {
+            throw new ConflictException("Already completed post-upload validation!");
+        }
+        
         var validationResult = storageProvider.validateUploadCompletion(file);
         if (!validationResult.isSuccess()) {
             switch (validationResult.getFailureReason()) {
