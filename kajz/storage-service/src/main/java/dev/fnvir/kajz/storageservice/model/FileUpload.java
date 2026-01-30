@@ -35,6 +35,7 @@ public class FileUpload extends Auditable {
     /** 
      * The ID of the owner of the file.
      */
+    @Column(nullable = false) // no anonymous uploads allowed yet
     private UUID ownerId;
     
     @Column(nullable = false)
