@@ -2,6 +2,7 @@ package dev.fnvir.kajz.storageservice.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -25,6 +26,7 @@ import com.azure.storage.common.sas.SasProtocol;
 import dev.fnvir.kajz.storageservice.config.AzureBlobStorageProperties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.exception.NotFoundException;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
@@ -178,7 +180,36 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         
         return blobClient::openInputStream;
     }
-    
-    
+
+    @Override
+    public PreSignedDownloadUrlResponse generatePreSignedDownloadUrl(String key, Duration expiry) {
+        if(!StringUtils.hasText(key)) {
+            throw new IllegalArgumentException("Blank key not allowed");
+        }
+        
+        BlobClient blobClient = blobContainerClient.getBlobClient(key);
+        if (!blobClient.exists()) {
+            throw new NotFoundException("File doesn't exist");
+        }
+        
+        // Permissions: read
+        BlobSasPermission perms = new BlobSasPermission()
+                .setReadPermission(true);
+
+        Instant expiresAt = Instant.now().plus(expiry);
+        OffsetDateTime expiresAtOffset = expiresAt.atOffset(ZoneOffset.UTC);
+
+        BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiresAtOffset, perms)
+                .setProtocol(FORCE_HTTPS_ON_SAS ? SasProtocol.HTTPS_ONLY : SasProtocol.HTTPS_HTTP)
+                .setStartTime(OffsetDateTime.now().minusSeconds(5));
+
+        String sasToken = blobClient.generateSas(values);
+        String downloadUrl = String.join("?", blobClient.getBlobUrl(), sasToken);
+        
+        return PreSignedDownloadUrlResponse.builder()
+                .url(downloadUrl)
+                .expiresAt(expiresAt)
+                .build();
+    }
 
 }

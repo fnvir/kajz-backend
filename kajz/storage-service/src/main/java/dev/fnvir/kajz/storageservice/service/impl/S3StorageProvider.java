@@ -2,6 +2,7 @@ package dev.fnvir.kajz.storageservice.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.concurrent.Callable;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -11,6 +12,7 @@ import org.springframework.util.StringUtils;
 import dev.fnvir.kajz.storageservice.config.AwsS3Properties;
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.exception.NotFoundException;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
@@ -37,6 +39,7 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -239,6 +242,27 @@ public class S3StorageProvider extends AbstractStorageProvider {
                 .key(key)
                 .build();
         return () -> s3Client.getObject(getReq, ResponseTransformer.toInputStream());
+    }
+
+    @Override
+    public PreSignedDownloadUrlResponse generatePreSignedDownloadUrl(String key, Duration expiry) {
+        
+        GetObjectRequest getReq = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        
+        GetObjectPresignRequest presignReq = GetObjectPresignRequest.builder()
+                .signatureDuration(expiry)
+                .getObjectRequest(getReq)
+                .build();
+        
+        var presignedReq = s3Presigner.presignGetObject(presignReq);
+        
+        return PreSignedDownloadUrlResponse.builder()
+                .url(presignedReq.url().toString())
+                .expiresAt(presignedReq.expiration())
+                .build();
     }
     
 }

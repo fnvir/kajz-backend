@@ -1,5 +1,6 @@
 package dev.fnvir.kajz.storageservice.service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import dev.fnvir.kajz.storageservice.dto.req.CompleteUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
 import dev.fnvir.kajz.storageservice.enums.UploadStatus;
 import dev.fnvir.kajz.storageservice.exception.ApiException;
@@ -168,6 +170,13 @@ public class StorageService {
         }
         
         return file;
+    }
+
+    public PreSignedDownloadUrlResponse generateTempDownloadUrl(Long fileId, UUID userId) {
+        var file = findByIdAndVerifyOwnershipOrThrow(fileId, userId);
+        if (!file.isAvailable())
+            throw new NotFoundException("File not validated or has been deleted");
+        return storageProvider.generatePreSignedDownloadUrl(file.getStoragePath(), Duration.ofMinutes(3));
     }
 
 }

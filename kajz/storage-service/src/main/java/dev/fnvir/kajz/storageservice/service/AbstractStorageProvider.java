@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 
 import dev.fnvir.kajz.storageservice.dto.UploadValidationResultDTO;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.enums.StorageProviderType;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import lombok.extern.slf4j.Slf4j;
@@ -84,4 +85,13 @@ public abstract class AbstractStorageProvider {
      */
     public abstract Callable<InputStream> downloadFile(String key);
 
+    /**
+     * Generate a pre-signed download URL for the given key with the specified
+     * expiry duration.
+     * 
+     * @param key    the object-key (S3) / blob-name (Azure Blob) of the file.
+     * @param expiry the duration after which the URL will expire.
+     * @return the pre-signed download URL response.
+     */
+    public abstract PreSignedDownloadUrlResponse generatePreSignedDownloadUrl(String key, Duration expiry);
 }

@@ -26,12 +26,12 @@ import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.ErrorResponse;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.service.StorageService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -103,8 +103,7 @@ public class StorageController {
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     public ResponseEntity<StreamingResponseBody> serveFileValidatingAccess(
             @PathVariable Long fileId,
-            @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch,
-            HttpServletResponse response
+            @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch
     ) {
         StreamFileDto result = storageService.downloadFileValidatingAccess(fileId, ifNoneMatch);
         
@@ -127,7 +126,24 @@ public class StorageController {
                 .eTag(result.getEtag())
                 .body(result.streamFile());
     }
-    
-    
-    
+
+    /**
+     * Generate a pre-signed temporary URL for downloading a file.
+     * 
+     * Only file owners can generate pre-signed URLs for their files. 
+     * 
+     * <strong> This endpoint is recommended for downloading/accessing private files. </strong>
+     * 
+     * @param fileId         the ID of the file
+     * @param authentication the authentication object
+     * @return response containing the pre-signed download URL
+     */
+    @GetMapping("/files/{fileId}/temp-url")
+    public ResponseEntity<PreSignedDownloadUrlResponse> generateTempDownloadUrl(
+            @PathVariable Long fileId,
+            Authentication authentication
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return ResponseEntity.ok(storageService.generateTempDownloadUrl(fileId, userId));
+    }
 }
