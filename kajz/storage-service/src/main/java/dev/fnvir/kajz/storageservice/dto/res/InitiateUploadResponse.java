@@ -3,6 +3,9 @@ package dev.fnvir.kajz.storageservice.dto.res;
 import java.time.Instant;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+
 import lombok.Builder;
 
 /**
@@ -10,6 +13,7 @@ import lombok.Builder;
  */
 @Builder
 public record InitiateUploadResponse (
+        @JsonFormat(shape = Shape.STRING)
         Long fileId,
         String uploadUrl,
         Instant expiresAt,
