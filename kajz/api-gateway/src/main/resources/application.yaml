@@ -9,7 +9,7 @@ spring:
   webflux:
     multipart:
       max-disk-usage-per-part: 5MB
-      max-in-memory-size: 15MB
+      max-in-memory-size: 1MB
       max-parts: 4
     
   data:
@@ -60,6 +60,16 @@ spring:
                 args:
                   key-resolver: "#{@ipKeyResolver}"
                   rate-limiter: "#{@redisRateLimiter}"
+                  
+          - id: storage-service
+            uri: lb://STORAGESERVICE
+            predicates:
+              - Path=/storage/**, /storage-service/v3/api-docs
+            filters:
+              - name: RequestRateLimiter
+                args:
+                  key-resolver: "#{@ipKeyResolver}"
+                  rate-limiter: "#{@redisRateLimiter}"
 
 eureka:
   instance:
@@ -87,6 +97,8 @@ springdoc:
       url: /auth-service/v3/api-docs
     - name: Notification Service
       url: /notification-service/v3/api-docs
+    - name: Storage Service
+      url: /storage-service/v3/api-docs
 
 
 server:
