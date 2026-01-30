@@ -9,10 +9,10 @@ CREATE TABLE file_uploads (
     access varchar(255) not null check ((access in ('PUBLIC','PRIVATE','PROTECTED'))),
     status varchar(255) not null check ((status in ('UPLOADING','UPLOADED','PROCESSING','VALIDATED','FAILED'))),
     metadata jsonb,
-    completed_at timestampz,
+    completed_at timestamptz,
     deleted boolean default false not null,
-    created_at timestampz default current_timestamp not null,
-    updated_at timestampz default current_timestamp not null,
+    created_at timestamptz default current_timestamp not null,
+    updated_at timestamptz default current_timestamp not null,
     created_by varchar(50),
     updated_by varchar(50)
 );
