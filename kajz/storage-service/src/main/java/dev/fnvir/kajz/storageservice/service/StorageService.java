@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
@@ -130,7 +132,7 @@ public class StorageService {
     }
     
     public StreamFileDto downloadFileValidatingAccess(Long fileId, String eTag) {
-        var fileRecord = readOnlyTransaction.execute(_ -> findByIdAndValidateAccess(fileId));
+        var fileRecord = readOnlyTransaction.execute(_ -> findByIdAndValidateAccess(fileId, "ADMIN", "SYSTEM"));
         
         if (!fileRecord.isAvailable()) {
             throw new NotFoundException("File isn't active.");
@@ -154,17 +156,15 @@ public class StorageService {
         
     }
     
-    private FileUpload findByIdAndValidateAccess(Long fileId) {
-        FileUpload file = readOnlyTransaction.execute(_ -> 
-            storageRepository.findById(fileId).orElseThrow(NotFoundException::new)
-        );
+    private FileUpload findByIdAndValidateAccess(Long fileId, String... allowedRoles) {
+        FileUpload file = storageRepository.findById(fileId).orElseThrow(NotFoundException::new);
         
         if (file.getAccess() != FileAccessLevel.PUBLIC) {
             if (!SecurityContextUtils.isAuthenticated())
                 throw new ApiException(HttpStatus.UNAUTHORIZED);
             
             if (file.getAccess() == FileAccessLevel.PRIVATE) {
-                if (!SecurityContextUtils.matchesUserIdOrHasAnyRole(file.getOwnerId(), "ADMIN", "SYSTEM"))
+                if (!SecurityContextUtils.matchesUserIdOrHasAnyRole(file.getOwnerId(), allowedRoles))
                     throw new ForbiddenException("Not authorized to access this file");
             }
         }
@@ -177,6 +177,21 @@ public class StorageService {
         if (!file.isAvailable())
             throw new NotFoundException("File not validated or has been deleted");
         return storageProvider.generatePreSignedDownloadUrl(file.getStoragePath(), Duration.ofMinutes(3));
+    }
+
+    @Transactional
+    public void deleteFile(Long fileId, UUID userId) {
+        var f = findByIdAndValidateAccess(fileId, "ADMIN", "SYSTEM"); // only owner and admins can delete files
+        storageRepository.delete(f);
+        
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    storageProvider.deleteFileAsync(f.getStoragePath());
+                }
+            }
+        );
     }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -145,6 +146,16 @@ public class StorageController {
     ) {
         UUID userId = UUID.fromString(authentication.getName());
         return ResponseEntity.ok(storageService.generateTempDownloadUrl(fileId, userId));
+    }
+    
+    @DeleteMapping("/files/{fileId}")
+    public ResponseEntity<Void> deleteFile(
+            @PathVariable Long fileId,
+            Authentication authentication
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        storageService.deleteFile(fileId, userId);
+        return ResponseEntity.noContent().build();
     }
     
 }
