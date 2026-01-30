@@ -3,17 +3,14 @@ package dev.fnvir.kajz.storageservice.dto;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import reactor.core.publisher.Flux;
 
 @Data
 @Builder
@@ -36,10 +33,17 @@ public class StreamFileDto {
                 .orElse(MediaType.APPLICATION_OCTET_STREAM);
     }
     
-    public Flux<DataBuffer> streamFile(DataBufferFactory bufferFactory) {
-        return Flux.defer(() -> {
-            return DataBufferUtils.readInputStream(inputStreamProvider, bufferFactory, 16 * 1024);
-        });
+    public StreamingResponseBody streamFile() {
+        return outStream -> {
+            try (InputStream inputStream = inputStreamProvider.call()) {
+                if (inputStream == null) {
+                    return;
+                }
+                inputStream.transferTo(outStream);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
 }

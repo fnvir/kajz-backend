@@ -6,45 +6,46 @@ import java.util.HashSet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
-import org.springframework.security.web.server.savedrequest.NoOpServerRequestCache;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 
 @Configuration
-@EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Bean
-    SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(ServerHttpSecurity.CorsSpec::disable)
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-            .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-            .authorizeExchange(req -> req
-                    .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .pathMatchers(
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(req -> req
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(
                             "/storage-service/swagger-ui/**", "/storage-service/swagger-ui.html", 
                             "/storage-service/v3/api-docs/**", "/storage-service/v3/api-docs.yaml")
                     .permitAll()
-                    .pathMatchers("/actuator/**", "/error")
+                    .requestMatchers("/actuator/**", "/error")
                     .permitAll()
-                    .pathMatchers(HttpMethod.GET, "/storage/download/**")
+                    .requestMatchers(HttpMethod.GET, "/storage/download/**")
                     .permitAll()
-                    .anyExchange()
+                    .anyRequest()
                     .authenticated()
             )
-            .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-            .requestCache(requestCacheSpec -> requestCacheSpec.requestCache(NoOpServerRequestCache.getInstance()))
+            .requestCache(requestCacheSpec -> requestCacheSpec.requestCache(new NullRequestCache()))
+            .sessionManagement(management -> management
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
                     .jwtAuthenticationConverter(keycloakJwtAuthConverter())))
             ;
@@ -52,7 +53,7 @@ public class SecurityConfig {
         return http.build();
     }
     
-    ReactiveJwtAuthenticationConverterAdapter keycloakJwtAuthConverter() {
+    JwtAuthenticationConverter keycloakJwtAuthConverter() {
         var jwtAuthenticationConverter = new JwtAuthenticationConverter();
         final JwtGrantedAuthoritiesConverter scopesConverter = new JwtGrantedAuthoritiesConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
@@ -69,7 +70,7 @@ public class SecurityConfig {
             }
             return authorities;
         });
-        return new ReactiveJwtAuthenticationConverterAdapter(jwtAuthenticationConverter);
+        return jwtAuthenticationConverter;
     }
 
 }

@@ -8,11 +8,9 @@ import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 public class SecurityContextUtils {
@@ -22,12 +20,8 @@ public class SecurityContextUtils {
 
     private SecurityContextUtils() {}
     
-    public static Mono<Authentication> getAuthMono() {
-        return ReactiveSecurityContextHolder.getContext().map(SecurityContext::getAuthentication);
-    }
-
     public static Authentication getAuthentication() {
-        return getAuthMono().block();
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
     public static Optional<UUID> getCurrentUser() {

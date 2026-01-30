@@ -42,10 +42,8 @@ spring:
   jackson:
     mapper:
       accept-case-insensitive-enums: true
-
-  webflux:
-    multipart:
-      max-disk-usage-per-part: 5MB
+  
+  mvc:
     apiversion:
       default: 1
       supported: 1
