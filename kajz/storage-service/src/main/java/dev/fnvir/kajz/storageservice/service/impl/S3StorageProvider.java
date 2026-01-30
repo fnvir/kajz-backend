@@ -237,6 +237,19 @@ public class S3StorageProvider extends AbstractStorageProvider {
         if (!StringUtils.hasText(key)) {
             throw new NotFoundException("File not found");
         }
+        
+        // first check if the object exists
+        var headReq = HeadObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        try {
+            s3Client.headObject(headReq);
+        } catch (NoSuchKeyException e) {
+            throw new NotFoundException("File doesn't exist");
+        }
+        
+        // then open inputStream
         GetObjectRequest getReq = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
