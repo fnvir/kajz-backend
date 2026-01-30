@@ -136,7 +136,7 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
-            <version>2.41.13</version>
+            <version>2.41.17</version>
         </dependency>
 
         <dependency>
@@ -154,6 +154,13 @@
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-redis-spring</artifactId>
             <version>7.6.0</version>
+        </dependency>
+
+        <!-- Fix aws sdk conflict with eureka httpclient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
         </dependency>
         
         <dependency>
