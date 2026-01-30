@@ -27,7 +27,7 @@ public class ApiException extends RuntimeException {
     }
 
     public ApiException(HttpStatusCode status) {
-        this(status, "Error");
+        this(status, status.toString());
     }
 
     public ApiException(int statusCode, String message) {
