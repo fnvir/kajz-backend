@@ -21,6 +21,7 @@ import dev.fnvir.kajz.storageservice.dto.StreamFileDto;
 import dev.fnvir.kajz.storageservice.dto.req.CompleteUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
+import dev.fnvir.kajz.storageservice.dto.res.FileUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
@@ -192,6 +193,11 @@ public class StorageService {
                 }
             }
         );
+    }
+
+    public FileUploadResponse getFileInfo(Long fileId) {
+        var f = readOnlyTransaction.execute(_ -> findByIdAndValidateAccess(fileId, "ADMIN", "SYSTEM"));
+        return fileUploadMapper.toResponseDto(f);
     }
 
 }

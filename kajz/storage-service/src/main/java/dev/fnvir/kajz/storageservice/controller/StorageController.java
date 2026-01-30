@@ -26,6 +26,7 @@ import dev.fnvir.kajz.storageservice.dto.req.CompleteUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.req.InitiateUploadRequest;
 import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.ErrorResponse;
+import dev.fnvir.kajz.storageservice.dto.res.FileUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.PreSignedDownloadUrlResponse;
 import dev.fnvir.kajz.storageservice.service.StorageService;
@@ -156,6 +157,14 @@ public class StorageController {
         UUID userId = UUID.fromString(authentication.getName());
         storageService.deleteFile(fileId, userId);
         return ResponseEntity.noContent().build();
+    }
+    
+    /**
+     * 
+     */
+    @GetMapping("/files/{fileId}/metadata")
+    public FileUploadResponse getFileInfo(@PathVariable Long fileId) {
+        return storageService.getFileInfo(fileId);
     }
     
 }
