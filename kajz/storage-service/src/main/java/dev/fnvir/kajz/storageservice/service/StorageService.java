@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ETag;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +21,14 @@ import dev.fnvir.kajz.storageservice.dto.res.CompleteUploadResponse;
 import dev.fnvir.kajz.storageservice.dto.res.InitiateUploadResponse;
 import dev.fnvir.kajz.storageservice.enums.FileAccessLevel;
 import dev.fnvir.kajz.storageservice.enums.UploadStatus;
+import dev.fnvir.kajz.storageservice.exception.ApiException;
 import dev.fnvir.kajz.storageservice.exception.ConflictException;
 import dev.fnvir.kajz.storageservice.exception.ForbiddenException;
 import dev.fnvir.kajz.storageservice.exception.NotFoundException;
 import dev.fnvir.kajz.storageservice.mapper.FileUploadMapper;
 import dev.fnvir.kajz.storageservice.model.FileUpload;
 import dev.fnvir.kajz.storageservice.repository.StorageRepository;
+import dev.fnvir.kajz.storageservice.util.SecurityContextUtils;
 import dev.fnvir.kajz.storageservice.util.UuidEncodeUtils;
 import io.hypersistence.tsid.TSID;
 import jakarta.validation.Valid;
@@ -124,17 +127,12 @@ public class StorageService {
         return file;
     }
     
-    public StreamFileDto downloadPublicFile(Long fileId, String eTag) {
-        var fileRecord = readOnlyTransaction.execute(_ ->
-                storageRepository.findById(fileId).orElseThrow(NotFoundException::new)
-        );
+    public StreamFileDto downloadFileValidatingAccess(Long fileId, String eTag) {
+        var fileRecord = readOnlyTransaction.execute(_ -> findByIdAndValidateAccess(fileId));
         
         if (!fileRecord.isAvailable()) {
             throw new NotFoundException("File isn't active.");
         }
-        
-        if(fileRecord.getAccess() != FileAccessLevel.PUBLIC)
-            throw new ForbiddenException("File isn't public!");
         
         if (fileRecord.getETag() != null && eTag != null
                 && ETag.quoteETagIfNecessary(fileRecord.getETag()).equals(ETag.quoteETagIfNecessary(eTag))
@@ -152,6 +150,24 @@ public class StorageService {
                 .inputStreamProvider(storageProvider.downloadFile(storagePath))
                 .build();
         
+    }
+    
+    private FileUpload findByIdAndValidateAccess(Long fileId) {
+        FileUpload file = readOnlyTransaction.execute(_ -> 
+            storageRepository.findById(fileId).orElseThrow(NotFoundException::new)
+        );
+        
+        if (file.getAccess() != FileAccessLevel.PUBLIC) {
+            if (!SecurityContextUtils.isAuthenticated())
+                throw new ApiException(HttpStatus.UNAUTHORIZED);
+            
+            if (file.getAccess() == FileAccessLevel.PRIVATE) {
+                if (!SecurityContextUtils.matchesUserIdOrHasAnyRole(file.getOwnerId(), "ADMIN", "SYSTEM"))
+                    throw new ForbiddenException("Not authorized to access this file");
+            }
+        }
+        
+        return file;
     }
 
 }

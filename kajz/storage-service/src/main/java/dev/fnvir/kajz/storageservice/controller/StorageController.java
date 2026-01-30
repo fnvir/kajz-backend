@@ -65,22 +65,30 @@ public class StorageController {
     }
     
     /**
-     * Serve a public file by its ID.
+     * Serve a file by its ID.
+     * 
+     * <ul>
+     * <li>If the file access is public, no authentication is required.</li>
+     * <li>If the file access is protected, the user must be authenticated.</li>
+     * <li>If the file access is private, the user must be authenticated and must be
+     * the owner of the file.</li>
+     * </ul>
      * 
      * @param fileId      the ID of the file to serve.
      * @param ifNoneMatch the ETag from the client for cache validation.
      * @param response    the server HTTP response to write to.
-     * @return 200 OK with file stream, 304 Not Modified, or 404 Not Found.
+     * @return 200 OK with file stream, 401 Unauthorized, 403 Forbidden, 304 Not
+     *         Modified, or 404 Not Found.
      */
     @SecurityRequirements
-    @GetMapping(path = "/public/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public Mono<ResponseEntity<Flux<DataBuffer>>> serveFile(
+    @GetMapping(path = "/download/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Mono<ResponseEntity<Flux<DataBuffer>>> serveFileValidatingAccess(
             @PathVariable Long fileId,
             @RequestHeader(value = HttpHeaders.IF_NONE_MATCH, required = false) String ifNoneMatch,
             ServerHttpResponse response
     ) {
         return Mono.fromCallable(() -> {
-            StreamFileDto result = storageService.downloadPublicFile(fileId, ifNoneMatch);
+            StreamFileDto result = storageService.downloadFileValidatingAccess(fileId, ifNoneMatch);
             
             if (result == null) {
                 return ResponseEntity.notFound().<Flux<DataBuffer>>build();
@@ -105,5 +113,4 @@ public class StorageController {
         .subscribeOn(Schedulers.boundedElastic());
     }
     
-
 }
