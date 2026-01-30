@@ -149,6 +149,13 @@ public class StorageController {
         return ResponseEntity.ok(storageService.generateTempDownloadUrl(fileId, userId));
     }
     
+    /**
+     * Delete a file by it's ID.
+     * 
+     * @param fileId         the id of the file to delete.
+     * @param authentication the auth object.
+     * @return 204 no-content
+     */
     @DeleteMapping("/files/{fileId}")
     public ResponseEntity<Void> deleteFile(
             @PathVariable Long fileId,
@@ -160,7 +167,9 @@ public class StorageController {
     }
     
     /**
-     * 
+     * Get file metadata by its ID.
+     * @param fileId the ID of the file
+     * @return 200 the file metadata
      */
     @GetMapping("/files/{fileId}/metadata")
     public FileUploadResponse getFileInfo(@PathVariable Long fileId) {

@@ -121,7 +121,7 @@ public class StorageService {
         file.setETag(validationResult.getETag());
         file = storageRepository.save(file);
         
-        return fileUploadMapper.fileUploadToResponse(file);
+        return fileUploadMapper.toUploadCompleteResponse(file);
     }
     
     private FileUpload findByIdAndVerifyOwnershipOrThrow(Long fileId, UUID userId) {

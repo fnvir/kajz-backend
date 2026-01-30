@@ -19,7 +19,7 @@ public interface FileUploadMapper {
     @Mapping(target = "contentType", source = "mimeType")
     @Mapping(target = "startedAt", source = "createdAt")
     @Mapping(target = "contentLength", source = "contentSize")
-    CompleteUploadResponse fileUploadToResponse(FileUpload fileUpload);
+    CompleteUploadResponse toUploadCompleteResponse(FileUpload fileUpload);
     
     @Mapping(target = "fileId", source = "id")
     FileUploadResponse toResponseDto(FileUpload fileUpload);
