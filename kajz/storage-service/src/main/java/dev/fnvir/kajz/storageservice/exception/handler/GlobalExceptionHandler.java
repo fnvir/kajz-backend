@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
-import dev.fnvir.kajz.storageservice.dto.ErrorResponse;
+import dev.fnvir.kajz.storageservice.dto.res.ErrorResponse;
 import dev.fnvir.kajz.storageservice.exception.ApiException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

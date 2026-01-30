@@ -1,4 +1,4 @@
-package dev.fnvir.kajz.storageservice.dto;
+package dev.fnvir.kajz.storageservice.dto.res;
 
 import java.time.Instant;
 
