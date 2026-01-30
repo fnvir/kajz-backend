@@ -89,9 +89,9 @@ public class StorageService {
             }
         }
         
-        file.setStatus(UploadStatus.UPLOADED);
+        file.setStatus(UploadStatus.VALIDATED);
         file.setCompletedAt(Instant.now());
-        
+        file.setETag(validationResult.getETag());
         file = storageRepository.save(file);
         
         return fileUploadMapper.fileUploadToResponse(file);
@@ -104,5 +104,5 @@ public class StorageService {
         }
         return file;
     }
-
+    
 }

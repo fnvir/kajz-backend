@@ -16,6 +16,9 @@ public class UploadValidationResultDTO {
     /** The reason of the validation failure. */
     private UploadValidationFailureReason failureReason;
     
+    /** The ETag of the uploaded file. */
+    private String eTag;
+    
     
     private UploadValidationResultDTO(boolean success) {
         this.success = success;
@@ -51,6 +54,11 @@ public class UploadValidationResultDTO {
     
     public UploadValidationResultDTO reason(UploadValidationFailureReason failureReason) {
         this.failureReason = failureReason;
+        return this;
+    }
+    
+    public UploadValidationResultDTO eTag(String eTag) {
+        this.eTag = eTag;
         return this;
     }
     

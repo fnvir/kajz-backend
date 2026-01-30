@@ -18,6 +18,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +48,8 @@ public class FileUpload extends Auditable {
     
     @Column(nullable = false)
     private Long contentSize;
+    
+    private String eTag;
     
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

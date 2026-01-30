@@ -133,6 +133,8 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
         // validate uploaded file's content-length
         long filesize = properties.getBlobSize();
         boolean isValidBlobSize = fileValidatorUtils.isValidFileSize(filesize);
+        String eTag = properties.getETag();
+        
         if (!isValidBlobSize) {
             return UploadValidationResultDTO.invalidContentLength();
         }
@@ -148,7 +150,7 @@ public class AzureBlobStorageProvider extends AbstractStorageProvider {
             log.error("Skipping content-type validation: IO error in input stream of blob. {}", e.getMessage());
 //            return UploadValidationResultDTO.failed();
         }
-        return UploadValidationResultDTO.success();
+        return UploadValidationResultDTO.success().eTag(eTag);
         
     }
 

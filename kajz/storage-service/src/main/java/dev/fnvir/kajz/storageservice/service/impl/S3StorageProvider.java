@@ -173,9 +173,14 @@ public class S3StorageProvider extends AbstractStorageProvider {
                 .bucket(bucketName)
                 .key(storageKey)
                 .build();
+        
+        String eTag = null;
+        
         try {
             // verify uploaded file exists
             HeadObjectResponse headRes = s3Client.headObject(headReq);
+            
+            eTag = headRes.eTag();
             
             // validate uploaded file's size
             boolean isValidFileSize = fileValidatorUtils.isValidFileSize(headRes.contentLength());
@@ -204,7 +209,7 @@ public class S3StorageProvider extends AbstractStorageProvider {
         } catch (IOException e) {
             log.error("Skipping content-type validation: IO error in input stream of s3 object. {}", e.getMessage());
         }
-        return UploadValidationResultDTO.success();
+        return UploadValidationResultDTO.success().eTag(eTag);
     }
 
     @Override
@@ -224,5 +229,5 @@ public class S3StorageProvider extends AbstractStorageProvider {
         
         return true;
     }
-    
+
 }
