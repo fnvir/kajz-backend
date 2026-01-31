@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.fnvir.kajz.storageservice.TestConfigurations;
 import dev.fnvir.kajz.storageservice.TestcontainersConfiguration;
@@ -32,8 +34,9 @@ import jakarta.persistence.Table;
  */
 @DataJpaTest(showSql = false)
 @Import({TestcontainersConfiguration.class, TestConfigurations.class, AuditConfig.class})
+@Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-//@EnabledIfEnvironmentVariable(named = "ENABLE_TC", matches = "true")
+@EnabledIfEnvironmentVariable(named = "ENABLE_TC", matches = "true")
 @ActiveProfiles("test")
 @DisplayName("Storage Repository Tests")
 public class StorageRepositoryTest {
