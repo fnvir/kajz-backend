@@ -1,0 +1,26 @@
+spring:
+  flyway:
+    enabled: false
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+management:
+  endpoints:
+    access:
+      default: none
+    web:
+      exposure:
+        exclude: "*"
