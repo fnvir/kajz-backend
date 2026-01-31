@@ -1,0 +1,1085 @@
+{
+  "info": {
+    "_postman_id": "d3665923-c569-4164-82b3-84f9716c43fa",
+    "name": "Kajz",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32879589"
+  },
+  "item": [
+    {
+      "name": "auth-service",
+      "item": [
+        {
+          "name": "Signup new user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"{{$randomFirstName}}\",\r\n  \"lastName\": \"{{$randomLastName}}\",\r\n  \"email\": \"farhantaanvir@gmail.com\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"dateOfBirth\": \"2000-05-09\" // YYYY-MM-DD\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/auth/signup",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": \"78987430-5d1e-43e1-a5d0-9d0eea3c6dda\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/auth/resend-verification-email",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "auth",
+                "resend-verification-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"farhantaanvir@gmail.com\",\r\n    \"otp\": \"542796\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/auth/verify-email",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Request password reset",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"farhantaanvir@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/auth/initiate-password-reset",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "auth",
+                "initiate-password-reset"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"farhantaanvir@gmail.com\",\r\n    \"otp\": \"724549\",\r\n    \"new_password\": \"hello1234\" // new password\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/auth/reset-password",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OTP Invalid or Expired",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"farhantaanvir@gmail.com\",\r\n    \"otp\": \"234568\",\r\n    \"new_password\": \"hello1234\" // new password\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BACKEND_URL}}/auth/reset-password",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "reset-password"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 13 Jan 2026 13:56:30 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Code is invalid or expired\"\n}"
+            },
+            {
+              "name": "Sucessfully reset - 204",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"farhantaanvir@gmail.com\",\r\n    \"otp\": \"724549\",\r\n    \"new_password\": \"hello1234\" // new password\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BACKEND_URL}}/auth/reset-password",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "reset-password"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Tue, 13 Jan 2026 14:02:26 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "Notification Publish Controller (Admin Only)",
+          "item": [
+            {
+              "name": "Send a push notification",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"userId\": \"6f4f2404-f792-40f9-932d-95c0be50f61b\",\r\n    \"recipientRole\": \"worker\",\r\n    \"title\": \"title-{{$randomInt}}\",\r\n    \"body\": \"{{$randomBs}}\",\r\n    \"type\": \"new-test\",\r\n    \"metadata\": {\r\n        \"orderId\": \"{{$randomUUID}}\"\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BACKEND_URL}}/notifications/publish/push",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "publish",
+                    "push"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Send an email",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"to\": [\r\n        \"farhan.tanvir2@g.bracu.ac.bd\"\r\n    ],\r\n    \"subject\": \"test email 2\",\r\n    \"content\": \"this is a test email\",\r\n    \"html\": false // whether this email body is html or plain text\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BACKEND_URL}}/notifications/publish/email",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "publish",
+                    "email"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Send an sms notification",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{BACKEND_URL}}/notifications/publish/sms",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "publish",
+                    "sms"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "auth": {
+            "type": "oauth2",
+            "oauth2": [
+              {
+                "key": "accessTokenUrl",
+                "value": "{{KEYCLOAK_URL}}/realms/kajz/protocol/openid-connect/token",
+                "type": "string"
+              },
+              {
+                "key": "password",
+                "value": "admin1234",
+                "type": "string"
+              },
+              {
+                "key": "username",
+                "value": "useradmin",
+                "type": "string"
+              },
+              {
+                "key": "grant_type",
+                "value": "password_credentials",
+                "type": "string"
+              },
+              {
+                "key": "refreshRequestParams",
+                "value": [],
+                "type": "any"
+              },
+              {
+                "key": "tokenRequestParams",
+                "value": [],
+                "type": "any"
+              },
+              {
+                "key": "authRequestParams",
+                "value": [],
+                "type": "any"
+              },
+              {
+                "key": "tokenName",
+                "value": "admin token",
+                "type": "string"
+              },
+              {
+                "key": "challengeAlgorithm",
+                "value": "S256",
+                "type": "string"
+              },
+              {
+                "key": "useBrowser",
+                "value": true,
+                "type": "boolean"
+              },
+              {
+                "key": "clientId",
+                "value": "test-postman",
+                "type": "string"
+              },
+              {
+                "key": "authUrl",
+                "value": "https://auth.prod.peytotest.publicvm.com/realms/peytoshop/protocol/openid-connect/auth",
+                "type": "string"
+              },
+              {
+                "key": "addTokenTo",
+                "value": "header",
+                "type": "string"
+              },
+              {
+                "key": "client_authentication",
+                "value": "header",
+                "type": "string"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subscribe to SSE real time notifications",
+          "request": {
+            "auth": {
+              "type": "oauth2",
+              "oauth2": [
+                {
+                  "key": "password",
+                  "value": "test1234",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "testuser",
+                  "type": "string"
+                },
+                {
+                  "key": "accessTokenUrl",
+                  "value": "{{KEYCLOAK_URL}}/realms/kajz/protocol/openid-connect/token",
+                  "type": "string"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password_credentials",
+                  "type": "string"
+                },
+                {
+                  "key": "tokenName",
+                  "value": "user token",
+                  "type": "string"
+                },
+                {
+                  "key": "authUrl",
+                  "value": "https://auth.prod.peytotest.publicvm.com/realms/peytoshop/protocol/openid-connect/auth",
+                  "type": "string"
+                },
+                {
+                  "key": "useBrowser",
+                  "value": true,
+                  "type": "boolean"
+                },
+                {
+                  "key": "clientId",
+                  "value": "test-postman",
+                  "type": "string"
+                },
+                {
+                  "key": "addTokenTo",
+                  "value": "header",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/notifications/sse?role=WORKER",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "notifications",
+                "sse"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "WORKER"
+                },
+                {
+                  "key": "Last-Event-ID",
+                  "value": "801417150681169678",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get all notifications of a user (cursor paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/notifications?userId=6f4f2404-f792-40f9-932d-95c0be50f61b&recipientRole=WORKER&limit=25",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "6f4f2404-f792-40f9-932d-95c0be50f61b",
+                  "description": "the ID of the user"
+                },
+                {
+                  "key": "recipientRole",
+                  "value": "WORKER",
+                  "description": "(optional) the role of notification recipient to filter"
+                },
+                {
+                  "key": "limit",
+                  "value": "25",
+                  "description": "(optional) the maximum number of notifications to retrieve (default is 20, max is 100)"
+                },
+                {
+                  "key": "cursor",
+                  "value": "2026-01-20T11:45:38.331348Z",
+                  "description": "(optional) the cursor for pagination to fetch more results",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark a notification as read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/notifications/:notificationId/read",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "notifications",
+                ":notificationId",
+                "read"
+              ],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": "019bdb39-4a4d-7727-bdbf-fd58449303b6",
+                  "description": "the id of the notification to read"
+                }
+              ]
+            },
+            "description": "## Mark a Notification as Read\n\n### Response Format (HTTP 200 - Success)\n\n### Response Fields\n\n- **id**: Unique identifier of the notification\n    \n- **userId**: ID of the user who owns the notification\n    \n- **recipientRole**: The role of the recipient (e.g., WORKER, ADMIN)\n    \n- **title**: The notification title/subject\n    \n- **body**: The notification message content\n    \n- **type**: The notification type/category\n    \n- **clickAction**: Optional action URL or identifier when notification is clicked\n    \n- **metadata**: Additional custom data associated with the notification (e.g., orderId)\n    \n- **read**: Boolean flag indicating if the notification has been read (will be true after successful request)\n    \n- **archived**: Boolean flag indicating if the notification has been archived\n    \n- **createdAt**: ISO 8601 timestamp of when the notification was created\n    \n\n### Error Responses\n\n#### 401 Unauthorized\n\n**Status Code**: 401  \n**When it occurs**: This error is returned when the request lacks valid authentication credentials. The user must be authenticated to mark notifications as read. Ensure that the authentication token (from KEYCLOAK_URL) is valid and included in the request headers.\n\n#### 403 Forbidden\n\n**Status Code**: 403  \n**When it occurs**: This error is returned when the authenticated user does not have permission to mark the specified notification as read. This typically occurs when a user attempts to mark a notification that belongs to another user as read. Users can only modify their own notifications.\n\n#### 404 Not Found\n\n**Status Code**: 404  \n**When it occurs**: This error is returned when the notification with the specified `notificationId` does not exist in the system. Verify that the notification ID is correct and that the notification has not been deleted."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/notifications/:notificationId",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "notifications",
+                ":notificationId"
+              ],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": "019bdbb9-adbf-7126-9504-f3f6bdeace1a",
+                  "description": "the id of the notification to delete"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "403 - not authorized to delete other's notifications",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{BACKEND_URL}}/notifications/:notificationId",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    ":notificationId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notificationId",
+                      "value": "{{$randomUUID}}",
+                      "description": "the id of the notification to delete"
+                    }
+                  ]
+                }
+              },
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 403,\n    \"message\": \"Forbidden\",\n    \"path\": \"/notifications/672f7ee6-9811-4588-94d8-ded81ce1f363\",\n    \"timestamp\": \"2026-01-20T12:13:14.528989300Z\"\n}"
+            },
+            {
+              "name": "Not Found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{BACKEND_URL}}/notifications/:notificationId",
+                  "host": [
+                    "{{BACKEND_URL}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    ":notificationId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "notificationId",
+                      "value": "{{$randomUUID}}",
+                      "description": "the id of the notification to delete"
+                    }
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "142"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"status\": 404,\n    \"message\": \"Not Found\",\n    \"path\": \"/notifications/672f7ee6-9811-4588-94d8-ded81ce1f363\",\n    \"timestamp\": \"2026-01-20T12:13:14.528989300Z\"\n}"
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "oauth2": [
+          {
+            "key": "refreshRequestParams",
+            "value": [],
+            "type": "any"
+          },
+          {
+            "key": "tokenRequestParams",
+            "value": [],
+            "type": "any"
+          },
+          {
+            "key": "authRequestParams",
+            "value": [],
+            "type": "any"
+          },
+          {
+            "key": "tokenName",
+            "value": "user token",
+            "type": "string"
+          },
+          {
+            "key": "challengeAlgorithm",
+            "value": "S256",
+            "type": "string"
+          },
+          {
+            "key": "username",
+            "value": "testuser",
+            "type": "string"
+          },
+          {
+            "key": "useBrowser",
+            "value": true,
+            "type": "boolean"
+          },
+          {
+            "key": "password",
+            "value": "test1234",
+            "type": "string"
+          },
+          {
+            "key": "grant_type",
+            "value": "password_credentials",
+            "type": "string"
+          },
+          {
+            "key": "clientId",
+            "value": "test-postman",
+            "type": "string"
+          },
+          {
+            "key": "authUrl",
+            "value": "https://auth.prod.peytotest.publicvm.com/realms/peytoshop/protocol/openid-connect/auth",
+            "type": "string"
+          },
+          {
+            "key": "addTokenTo",
+            "value": "header",
+            "type": "string"
+          },
+          {
+            "key": "client_authentication",
+            "value": "header",
+            "type": "string"
+          },
+          {
+            "key": "accessTokenUrl",
+            "value": "{{KEYCLOAK_URL}}/realms/kajz/protocol/openid-connect/token",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Storage Service",
+      "item": [
+        {
+          "name": "Initiate Upload Process",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"filename\": \"test.jpg\",\r\n    \"mimeType\": \"image/jpeg\",\r\n    \"fileSize\": \"13093\",\r\n    \"accessLevel\": \"private\",\r\n    \"purpose\": \"store-logo\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/storage/initiate-upload",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "storage",
+                "initiate-upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Complete upload and validate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fileId\": \"805055105169300835\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BACKEND_URL}}/storage/complete-upload",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "storage",
+                "complete-upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download files directly",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/storage/files/:fileId",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "storage",
+                "files",
+                ":fileId"
+              ],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "805156019805648624"
+                }
+              ]
+            },
+            "description": "###### Download a file by its ID.\n\n- If the file access is public, no authentication is required.\n    \n- If the file access is protected, the user must be authenticated.\n    \n- If the file access is private, the user must be authenticated and must be the owner of the file."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate temp download URL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/storage/files/:fileId/temp-url",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "storage",
+                "files",
+                ":fileId",
+                "temp-url"
+              ],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "805174047285938075"
+                }
+              ]
+            },
+            "description": "##### Generate a pre-signed temporary URL for downloading a file.\n\n- **This endpoint is recommended for downloading/accessing private files.**\n    \n- Only file owners can generate pre-signed URLs for their files."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a file",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/storage/files/:fileId",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "storage",
+                "files",
+                ":fileId"
+              ],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "805156019805648624"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get uploaded file's metadata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BACKEND_URL}}/storage/files/:fileId/metadata",
+              "host": [
+                "{{BACKEND_URL}}"
+              ],
+              "path": [
+                "storage",
+                "files",
+                ":fileId",
+                "metadata"
+              ],
+              "variable": [
+                {
+                  "key": "fileId",
+                  "value": "805174047285938075"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "oauth2": [
+          {
+            "key": "refreshRequestParams",
+            "value": [],
+            "type": "any"
+          },
+          {
+            "key": "tokenRequestParams",
+            "value": [],
+            "type": "any"
+          },
+          {
+            "key": "authRequestParams",
+            "value": [],
+            "type": "any"
+          },
+          {
+            "key": "tokenName",
+            "value": "user token",
+            "type": "string"
+          },
+          {
+            "key": "challengeAlgorithm",
+            "value": "S256",
+            "type": "string"
+          },
+          {
+            "key": "username",
+            "value": "testuser",
+            "type": "string"
+          },
+          {
+            "key": "useBrowser",
+            "value": true,
+            "type": "boolean"
+          },
+          {
+            "key": "password",
+            "value": "test1234",
+            "type": "string"
+          },
+          {
+            "key": "grant_type",
+            "value": "password_credentials",
+            "type": "string"
+          },
+          {
+            "key": "clientId",
+            "value": "test-postman",
+            "type": "string"
+          },
+          {
+            "key": "authUrl",
+            "value": "https://auth.prod.peytotest.publicvm.com/realms/peytoshop/protocol/openid-connect/auth",
+            "type": "string"
+          },
+          {
+            "key": "addTokenTo",
+            "value": "header",
+            "type": "string"
+          },
+          {
+            "key": "client_authentication",
+            "value": "header",
+            "type": "string"
+          },
+          {
+            "key": "accessTokenUrl",
+            "value": "{{KEYCLOAK_URL}}/realms/kajz/protocol/openid-connect/token",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BACKEND_URL",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "KEYCLOAK_URL",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
