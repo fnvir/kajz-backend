@@ -57,6 +57,35 @@ services:
           memory: 512M
     restart: always
 
+  storage-db:
+    image: postgres:18.1-alpine
+    container_name: storage-db
+    environment:
+      POSTGRES_DB: ${STORAGE_DB_NAME}
+      POSTGRES_USER: ${COMMON_DB_USER}
+      POSTGRES_PASSWORD: ${COMMON_DB_PASSWORD}
+    ports:
+      - "${STORAGE_DB_HOST_PORT}:5432"
+    volumes:
+      - ../../resources/kajz/db/storagedb:/var/lib/postgresql/data
+    networks:
+      - backend_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${COMMON_DB_USER} -d ${STORAGE_DB_NAME}" ]
+      interval: 20s
+      start_period: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    restart: always
+
   keycloak:
     build: ./keycloak
     container_name: keycloak
@@ -303,6 +332,45 @@ services:
           memory: 1G
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  storage-service:
+    build: storage-service
+    container_name: storage-service-container
+    hostname: storage-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      SPRING_PROFILES_ACTIVE: "prod"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://storage-db:5432/${STORAGE_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${COMMON_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${COMMON_DB_PASSWORD}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://${KEYCLOAK_HOST_NAME}:${KEYCLOAK_HOST_PORT}/realms/${KEYCLOAK_USER_REALM}
+      SERVER_PORT: 8080
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      STORAGE_PROVIDER: aws-s3 # aws-s3 | azure-blob
+      STORAGE_AWS_S3_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      STORAGE_AWS_S3_SECRET_KEY: ${AWS_SECRET_KEY}
+      STORAGE_AWS_S3_REGION: ${AWS_REGION}
+      STORAGE_AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      # If using Azure Blob Storage
+      # STORAGE_AZURE_BLOB_CONNECTION_STRING: ${AZURE_BLOB_CONNECTION_STRING}
+      # STORAGE_AZURE_BLOB_CONTAINER_NAME: ${AZURE_BLOB_CONTAINER_NAME}
+
+    ports:
+      - "${STORAGE_SERVICE_HOST_PORT}:8080"
+    volumes:
+      - ../../resources/kajz/storage/files:/data/files
+    networks:
+      - backend_network
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 350M
+        limits:
+          cpus: '1'
+          memory: 1G
 
   pgadmin:
     container_name: pgadmin4

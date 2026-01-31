@@ -1,0 +1,102 @@
+spring:
+  application:
+    name: StorageService
+  
+  threads:
+    virtual:
+      enabled: true
+    
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://host.docker.internal:8444/realms/kajz
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis1234
+    web:
+      pageable:
+        max-page-size: 100
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/storagedb
+    username: postgres
+    password: root
+  
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+    show_sql: true
+
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+  
+  mvc:
+    apiversion:
+      default: 1
+      supported: 1
+      use:
+        header: X-API-Version
+
+storage:
+  provider: aws-s3
+  aws:
+    s3: # set these through IDE environment variables
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+      region: ${AWS_REGION}
+      bucket-name: ${AWS_BUCKET_NAME}
+  azure:
+    blob:
+      connection-string: ${AZURE_BLOB_CONNECTION_STRING}
+      container-name: ${AZURE_BLOB_CONTAINER_NAME}
+      auto-create-container: false
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    enabled: true
+    fetch-registry: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+      
+springdoc:
+  swagger-ui:
+    path: /storage-service/swagger-ui.html
+  api-docs:
+    path: /storage-service/v3/api-docs
+    
+server:
+  port: 8083
+  http2.enabled: true
+  
+management:
+  endpoint:
+    health:
+      access: read-only
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  
+logging:
+  level:
+    '[dev.fnvir.kajz]': debug
+    '[com.netflix.discovery]': warn

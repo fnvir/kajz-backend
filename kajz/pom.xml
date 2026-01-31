@@ -23,6 +23,7 @@
     <module>auth-service</module>
     <module>api-gateway</module>
     <module>notification-service</module>
+    <module>storage-service</module>
   </modules>
 
   <developers>
