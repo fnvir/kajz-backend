@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/customerdb # using locally installed postgres for dev
+
+  flyway:
+    enabled: false
+  
+
+eureka:
+  client:
+    enabled: false
